@@ -3,7 +3,7 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
+title: System Thoughts
 subtitle: ''
 description: ''
 keywords:
@@ -13,9 +13,9 @@ timezone: ''
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://example.com/child' and root as '/child/'
-url: http://example.com
+url: https://system-thoughts.github.io/
 root: /
-permalink: :year/:month/:day/:title/
+permalink: :category/:title/
 permalink_defaults:
 pretty_urls:
   trailing_index: true # Set to false to remove trailing 'index.html' from permalinks
@@ -39,9 +39,9 @@ external_link:
   enable: true # Open external links in new tab
   field: site # Apply to the whole site
   exclude: ''
-filename_case: 0
+filename_case: 1
 render_drafts: false
-post_asset_folder: false
+post_asset_folder: true
 relative_link: false
 future: true
 highlight:
