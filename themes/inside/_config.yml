@@ -95,8 +95,8 @@ profile:
 
 # Sidebar navigation links
 menu:
-  Home: /
-  About: /about
+  🏠 Home: /
+  👉 About: /about
   # Links: /links
   Github: https://github.com/system-thoughts
 
@@ -322,7 +322,7 @@ data_prefix:
 data_dir:
 
 # Favicon, default to `favicon.ico`
-favicon:
+favicon: /images/favicon.ico
 
 # Google analytics
 # ga: UA-00000000-0
