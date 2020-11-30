@@ -258,12 +258,10 @@ reward:
   # wechat, alipay, paypal and bitcoin has a built-in icon,
   # use `name` to apply
   methods:
-    -
-      name: wechat
+    - name: wechat
       qrcode: /images/wechat.jpg
       text: This is a wechat payment link
-    -
-      name: alipay
+    - name: alipay
       qrcode: /images/alipay.jpg
       text: This is an Alipay link
 
