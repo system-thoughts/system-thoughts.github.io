@@ -150,10 +150,10 @@ page:
   # toc: false
 
   # Display reward, default to `false`
-  # reward: true
+  reward: true
 
   # Display copyright notice, default to `false`
-  # copyright: true
+  copyright: true
 
 
 # Post
@@ -166,8 +166,8 @@ post:
 
   # The following settings are the same as the page
   # toc: false
-  # reward: true
-  # copyright: true
+  reward: true
+  copyright: true
 
 # Archive
 archive:
@@ -291,8 +291,8 @@ copyright:
 # Built-in support Disqus (https://disqus.com) and LiveRe (https://livere.com),
 # for other comment system, see plugins
 comments:
-  # disqus:
-  #   shortname: disqus_shortname
+  disqus:
+    shortname: system-thoughts
   #   # Or you can set disqus script URL directly
   #   script: //disqus_shortname.disqus.com/embed.js
   #   # Autoload, default to `true`, set to `false` to display a button
