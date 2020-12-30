@@ -1,7 +1,7 @@
 ---
-title: [译文] Becoming friends with NetworkManager
+title: 【译文】 Becoming friends with NetworkManager
 date: 2020-12-30T21:06:21+08:00
-tags: [RedHat NetworkManager Network]
+tags: [RedHat, NetworkManager, Network]
 categories:
   - translation
   - Linux tools
@@ -37,4 +37,104 @@ NetworkManager的配置基于设备(device)和连接(connection)的概念。设�
 
 连接表示要在设备上应用的完整配置，就是个属性列表。 属于同一配置区域的属性被划分为设置组（例如，ipv4设置组属性，包含地址，网关和路由）。
 在NetworkManager中配置网络就是简单地激活设备上的连接：设备随后会被配置为连接中的所有属性。
+尽管前面提及的多个工具都可配置NetworkManager，但现在我们将重点放在NetworkManager自带的命令行工具`nmcli`上。
+
+> 注意：`nmcli`程序具有高级的自动补全功能。确保安装了`bash-completion`软件包以利用此优势。
+
+## nmcli基础
+让我们看下使用`nmcli`处理网络的各个方面。
+### 设备
+列出NetworkManager检测到的设备：
+```bash
+$ nmcli device
+DEVICE   TYPE       STATE           CONNECTION
+enp1s0   ethernet   connected       ether-enp1s0
+enp7s0   ethernet   disconnected    --
+enp8s0   ethernet   disconnected    -- 
+```
+从输出中可见，NetworkManager已检测到系统中的三个以太网设备。仅第一个设备`enp1s0`上有活动连接（表示已配置）。
+如果您希望NetworkManager一段时间内不再管理一个设备，无需将其关闭，仅需暂时取消管理(unmanage)该设备即可：
+```bash
+$ nmcli device set enp8s0 managed no
+$ nmcli device
+DEVICE   TYPE       STATE          CONNECTION
+enp1s0   ethernet   connected      ether-ens3
+enp7s0   ethernet   disconnected   --
+enp8s0   ethernet   unmanaged      --
+```
+此更改不是持久化的，重启不生效。
+查询每个设备IP配置最简单的方法就是不带参数的执行`nmcli`命令：
+```bash
+$ nmcli
+enp1s0: connected to enp1s0
+      "Red Hat Virtio"
+      ethernet (virtio_net), 52:54:00:XX:XX:XX, hw, mtu 1500
+      ip4 default
+      inet4 192.168.122.225/24
+      route4 0.0.0.0/0
+      route4 192.168.122.0/24
+      inet6 fe80::4923:6a4f:da44:6a1c/64
+      route6 fe80::/64
+      route6 ff00::/8
+
+enp7s0: disconnected
+      "Intel 82574L"
+      ethernet (e1000e), 52:54:00:XX:XX:XX, hw, mtu 1500
+
+enp8s0: unmanaged
+      "Red Hat Virtio"	
+      ethernet (virtio_net), 52:54:00:XX:XX:XX, hw, mtu 1500
+```
+### 连接
+列出可用连接：
+```bash
+$ nmcli connection
+NAME                 UUID                                  TYPE       DEVICE
+ether-enp1s0         23e0d89e-f56c-3617-adf2-841e39a85ab4  ethernet   enp1s0
+Wired connection 1   fceb885b-b510-387a-b572-d9172729cf18  ethernet   --
+Wired connection 2   074fd16d-daa6-3b6a-b092-2baf0a8b91b9  ethernet   --
+```
+从输出可见，唯一的活动连接是应用于设备`enp1s0`的`ether-enp1s0`。也存在其他两个连接，但是它们不处于活动状态。
+要停用连接，即取消配置关联的设备，只需指示NetworkManager断开连接即可。 例如，要停用ether-enp1s0连接：
+```bash
+$ nmcli connection down ether-enp1s0
+```
+要重新激活它，即重新配置设备：
+```bash
+$ nmcli connection up ether-enp1s0
+```
+要查看特定连接的详细信息，我们应该检查连接的属性：
+```bash
+$ nmcli connection show ether-enp1s0
+connection.id:                     ether-enp1s0
+connection.uuid:                   23e0d89e-f56c-3617-adf2-841e39a85ab4
+connection.stable-id:              --
+connection.type:                   802-3-ethernet
+connection.interface-name:         enp1s0
+connection.autoconnect:            yes
+connection.autoconnect-priority:   -999
+connection.autoconnect-retries:    -1 (default)
+connection.auth-retries:           -1
+connection.timestamp:              1559320203
+connection.read-only:              no
+[...]
+```
+连接属性的列表很长，并且按设置分组。 实际上，每个属性都被指定为`setting_name.property_name`。我们重点介绍一些属于连接和IPv4设置的基本属性：
+| 属性 | 描述 | 别名 |
+| --- | --- | --- |
+| connection.id | 连接名称(nmcli connection中输出) | con-name |
+| connection.uuid | 全局唯一标识符UUID，唯一标识连接 | (none) |
+| connection.type | 连接类型 | type |
+| connection.interface-name | 将连接绑定到特定设备，只能在该设备上激活该连接 | ifname |
+| connection.autoconnect | 连接是否应该被自动激活 | autoconnect |
+| ipv4.method | 连接的IPv4方法：自动(auto)，禁用(disabled)，链接本地(link local)，手动(manual)或共享(shared) | (none) |
+| ipv4.addresses | 连接的静态IPv4地址 | (none) |
+
+> 请注意，少数常用属性具有别名，即可以用来代替完整设置的短名称。上表在第三列中列出了别名。 而且，所有nmcli命令都可以被截断，且能执行相同的操作。 例如，要关闭ether-enp1s0连接的自动连接，我们可以将上面的modify命令缩短为：
+`$nmcli c m ether-ens1s0 autoconnect no`
+
+`autoconnect`属性控制连接的自动激活。如果启用了它（`= yes`，默认值），`interface-name`设备就绪状态且其上无活动连接时，NetworkManager会自动激活该连接。 如果将`ipv4.method`设置为`auto`，则可以通过DHCP配置IPv4。
+
+
+
 
