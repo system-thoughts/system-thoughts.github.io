@@ -16,11 +16,11 @@ RHEL8开始，越来越多的网络管理手段貌似只能通过NetworkManager�
 > 原文链接： https://www.redhat.com/sysadmin/becoming-friends-networkmanager
 
 您对Linux主机自动配置网络感到惊讶吗？很有可能这是NetworkManager帮您完成这项任务。NetworkManager是当今Linux发行版中最为广泛使用的网络配置守护程序。
-然而，您是否禁用了NetworkManager，并且想知道为什么您首选的Linux发行版没有使用旧的IP工具作为默认的网络配置方法？ 您是否认为NetworkManager是仅适用于WiFi”？ 好吧，这篇博客文章也适合您。 跟随几分钟，留下偏见，并给此工具一个公平的机会。 我敢打赌，您会放下对NetworkManager的成见，甚至可以成为朋友。
-在本文中，我会介绍为什么NetworkManager是许多场景下（包括命令行和GUI）的理想选择。 接下来，我将解释该工具的基本原理（经常被误解）。 最后，我将重点介绍每个用户应该掌握NetworkManager的一些命令。
+然而，您是否禁用了NetworkManager，并且想知道为什么您首选的Linux发行版没有使用旧的IP工具作为默认的网络配置方法？您是否认为NetworkManager仅适用于WiFi？如果您有上述疑问这篇文章或许适合您。接下来请抛开偏见，给NetworkManager一个公平的机会。我敢打赌，读完这篇文章后，您会放下对NetworkManager的成见，甚至喜欢上它。
+我会介绍为什么NetworkManager是许多场景下（包括命令行和GUI）的理想选择。随后，我将解释该工具的基本原理（经常被误解）。最后，我将重点介绍每个用户应该掌握关于NetworkManager的一些命令。
 
 ## 为什么是NetworkManager？
-在Linux主机上配置网络有多种方法，因此您可能想知道为什么要专门使用NetworkManager。 尽管有很多不错的答案，但我想强调一个经常被忽略的要点：NetworkManager允许用户和应用程序同时查询和修改网络的配置，从而确保获得一致且最新的网络视图。
+Linux主机中配置网络的方法有很多，因此您可能会问为什么要专门使用NetworkManager。尽管已经有很多不错的答案，但我想强调一个经常被忽略的要点：NetworkManager允许用户和应用程序同时检索(retrieve)和修改网络的配置，从而确保获得一致且最新的网络视图。
 可通过桌面GUI（Gnome、KDE、nm-applet）、文本界面（`nmtui`）、命令行（`nmcli`）、文件和Web控制台（`Cockpit`）多种方式配置此工具。NetworkManager为应用程序提供了API：D-Bus接口、libnm库。其他网络配置工具都没有这么灵活。
 ## NetworkManager的原理
 为了理解和掌握NetworkManager，您首先需要了解其基础配置原理。以下摘自man NetworkManager：
