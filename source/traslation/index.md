@@ -13,4 +13,4 @@ date: 2020-12-29 20:29:41
 ## Content
 
 ### Linux tools
-1. [Becoming friends with NetworkManager](https://system-thoughts.github.io/translation/linux-tools/[译文] Becoming friends with NetworkManager/)
+1. {% post_link '[译文] Becoming friends with NetworkManager' %}
