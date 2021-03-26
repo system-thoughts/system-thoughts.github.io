@@ -17,16 +17,20 @@ MUA → MSA → MTA → … → MTA → MDA →→ MRA →→ MUA
 这里对上述术语做一个清晰的解释：
 * MUA(Message User Agent): MUA是终端用户管理和读取存储到用户邮箱的电子邮件的前端，并可在其中进行邮件编辑(compose)且通过MSA发送出去。
 * MTA(Message Transfer Agent)：MTA对邮件进行排队(queue)、接收(receive from)、并发送(send)给下一MTA。这包括邮件路由(routing mail)、排队(queuing)和重试(retrying)，如果下一MTA未能立即接收或者处理email或者便向原始发件人发送通知。
+* MSA(Message Submission Agent)：接收来自MUA发送的邮件，作为SMTP client，仅能发送email，而不能像Full-fledged MTA接收email进行转发。MTA使用端口25，MSA不仅可以使用端口25，还有offical port 587。MSA使用ESMTP(SMTP协议的变种)。MSA有时候也形象地称为Mail Sending Agent。
+* MDA(Message Delivery Agent)：MDA收到邮件之后不会往下转发，即邮件已经投递到位。MDA将邮件放入收件箱(incoming mailbox)，MDA可以调用`procmail`
+* MRA(Mail Retrieval Agent)：与远程邮箱建立连接并获取邮件到本地使用，MRA是从邮件接收者的视角来命名，IETF不支持该术语，认为其是MUA[1]。
 
 
 ## Send email
-MTA可以分为两类：仅转发(relay-only)、全功能(full-fledged)[1]。
-* Relay-only MTAs: 或者称为Send-only MTAs、small MTAs(SMTP clients)[2]，此类MTA仅将你的email转发到另一个服务器，如果你像我一样仅仅想发送我的Gmail邮件，此类MTA是最好的选择。SMTP client仅执行某些特定的功能，而不像Full-fledged MTA一样运行完成的SMTP服务器，占用大量的资源开销。这样的MTA不会监听传入的消息，尽在需要发送邮件的时候运行。small MTA通常作为MSA即邮件发送的第一站。
+MTA可以分为两类：仅转发(relay-only)、全功能(full-fledged)[2]。
+* Relay-only MTAs: 或者称为Send-only MTAs、small MTAs(SMTP clients)[3]，此类MTA仅将你的email转发到另一个服务器，如果你像我一样仅仅想发送自己的Gmail邮件，此类MTA是最好的选择。SMTP client仅执行某些特定的功能，而不像Full-fledged MTA一样运行完成的SMTP服务器，占用大量的资源开销。这样的MTA不会监听传入的消息，尽在需要发送邮件的时候运行。small MTA通常作为MSA即邮件发送的第一站。
 * Full-fledged MTAs：也称为mail hub，能够处理Internet邮件传送的所有细节，通常这类MTA从Relay-Only MTA接收邮件再进行转发。邮件在Internet的中间MTA转发漫游时，这些MTA使用full-fledged MTA比较合适。
 
 ## Reference
-[1] Postfix vs. Sendmail vs. Exim https://blog.mailtrap.io/postfix-sendmail-exim/?amp=1
-[2] MTA: Mail Transport Agent (SMTP server) https://gitlab.com/muttmua/mutt/-/wikis/MailConcept
+[1] Email agent (infrastructure) https://en.wikipedia.org/wiki/Email_agent_(infrastructure)#cite_note-modularmonolithic-schroder-1
+[2] Postfix vs. Sendmail vs. Exim https://blog.mailtrap.io/postfix-sendmail-exim/?amp=1
+[3] MTA: Mail Transport Agent (SMTP server) https://gitlab.com/muttmua/mutt/-/wikis/MailConcept
 
 
 
@@ -40,8 +44,8 @@ MTA可以分为两类：仅转发(relay-only)、全功能(full-fledged)[1]。
 * MUA(Message User Agent)
 
 
-* MDA(Message Delivery Agent)
-* MRA(Mail Retrieval Agent)(与上述术语不同，IETF文档不支持这个术语，IEFT将该术语视为MUA)
+* 
+* MRA(Mail Retrieval Agent)(与上述术语不同，)
 
 MSA使用SMTP协议的变种ESMTP协议，MTAs基本上都具备MSA的功能，很少有程序是专门为MSA设计而不具备完整的MTA功能的。MTA和MSA功能都使用端口号25，但是MSA的官方端口是587。MTA接收用户的外来邮件(incoming email)，而MSA接收用户的外发邮件(outgoing email)。从这个细微的差异化描述来看，MSA仅能作为MUA外发邮件的第一站，而MTA可以作为邮件传送过程的任一中转站。
 MSA和MTA的功能分离带来了以下的好处：
