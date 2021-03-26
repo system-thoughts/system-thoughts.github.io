@@ -21,33 +21,74 @@ MUA → MSA → MTA → … → MTA → MDA →→ MRA →→ MUA
 * MDA(Message Delivery Agent)：MDA收到邮件之后不会往下转发，即邮件已经投递到位。MDA将邮件放入收件箱(incoming mailbox)，MDA可以调用`procmail`
 * MRA(Mail Retrieval Agent)：与远程邮箱建立连接并获取邮件到本地使用，MRA是从邮件接收者的视角来命名，IETF不支持该术语，认为其是MUA[1]。
 
+若是要通过mutt完成邮件的收发，还需要具备MSA和MRA功能的软件配合mutt。显然，在我们工作的客户端不需要Full-fledeged MTA完成邮件的中转，我们仅需将邮件发出即可。另外，我们也不需要MDA对邮件进行投递（如果您是为个人或者公司搭建邮件服务器，就当我没说🙊），因为我们使用的邮箱，诸如Gmail的邮件服务器已经完成邮件投递工作，我们仅需通过POP3/IMAP协议接收邮件。然而，我们通过搜索引擎配置搜索mutt的配置，经常会出现各种`mutt + x + y + ...`的搜索结果令人眼花缭乱。这是因为同一功能，你的选择很多，就拿MSA来说，您可以选择`postfix`、`sendmail`、`msmtp`等[2]。而且，同一软件具备的多种功能，如`sendmail`、`postfix`不仅具有MTA功能，还集成了MDA功能。😤害，这不是违背了Unix哲学"one task per tool"！是的，甚至连mutt也背离初心:
+> mutt was developed with the concept of "one task per tool", enabling performance through combination with other high quality modular programs. 
+
+但是mutt现在实际变成了当初它讨厌的样子😅：
+> ... or why mutt should not but slowly becomes an "all-in-1" program.
+
+mutt已经引入了最简单的MRA、MSA功能支持SMTP、POP3、IMAP进行邮件收发。为何会背离初心：
+> "This entire concept is rubbish and the mutt developers are just plain lazy [to add all the good stuff]."
+
+好吧，看来群众的力量是很难承受的……
+另外有些功能的界限实际难以区分，比如MDA和MRA。
+
+OK, 说了这么多关于邮件的基本概念，let's get hands dirty，第一步先安装mutt（本文使用CentOS8环境，Ubuntu用户应该会更方便）:
+```bash
+yum install mutt
+```
+
+## Retrieve email
+MUA使用POP3/IMAP协议从邮件服务器下载邮件。两者的区别如下[3]：
+* POP3(Post Office Protocol 3)：仅仅下载邮件服务器的inbox目录中的邮件到本地，不会下载sent、draft、deleted目录下的邮件。并且POP3不会同步，并且当email被下载到一台设备上时，email会从邮件服务器中删除。
+* IMAP(Internet Message Access Protocol)：允许在多个客户端上查看邮件（同步），IMAP会将邮件缓存到本地。IMAP还会同步各个设备的目录结构
+
+{% asset_img POP3.png %}
+上图展示了两台电脑都从同一email账号下载邮件（均使用POP3协议），两台电脑上的目录结构截然不同，因为POP3不会同步两台电脑中的目录。当有新邮件到来时，第一台电脑先下载了邮件，邮件便会从邮件服务器中删除，第二胎电脑是获取不到新邮件的。不过后面这个问题还好，很多邮件客户端可以设置`leave a copy of messages on the server`。
+
+POP3和IMAP的比较，如下表所示：
+| metrics |  POP3  | IMAP |
+| -- | -- | -- |
+| view without Internet | Yes | NO |
+| All the folders can be seen | NO | YES |
+| All the folders and emails are synchronized | NO | YES |
+| Email stored on the mail server | NO | YES |
+
+
+由于IMAP默认在本地仅缓存(cache)邮件，并不下载邮件，所以默认在无网络的条件下，使用IMAP的MUA是无法阅读邮件的，但是现在很多使用IMAP的MUA都可以设置将邮件下载到本地，而非仅仅缓存。
+POP3协议由于会将邮件下载到本地（下载会删除邮件服务器中的邮件），从而能够节约邮件服务器的空间，然而本地下载的邮件需要备份以免磁盘损坏邮件丢失。
+
+
 
 ## Send email
-MTA可以分为两类：仅转发(relay-only)、全功能(full-fledged)[2]。
-* Relay-only MTAs: 或者称为Send-only MTAs、small MTAs(SMTP clients)[3]，此类MTA仅将你的email转发到另一个服务器，如果你像我一样仅仅想发送自己的Gmail邮件，此类MTA是最好的选择。SMTP client仅执行某些特定的功能，而不像Full-fledged MTA一样运行完成的SMTP服务器，占用大量的资源开销。这样的MTA不会监听传入的消息，尽在需要发送邮件的时候运行。small MTA通常作为MSA即邮件发送的第一站。
+MTA进行邮件转发使用SMTP协议(Simple Mail Transfer Protocol)。如下这段话，我认为是对SMTP协议的功能的一个良好概括[4]。
+> SMTP is basically a set of commands that authenticates and directs the transfer of email
+
+更简单方式的记住S(ending) M(ail) T(o) P(eople)。下图展示了通过SMTP协议将邮件从SMTP client途径SMTP server传递到收件人的SMTP server，最终收件用户登录信箱通过POP3/IMAP下载邮件。
+{% asset_img smtp.png %}
+
+MTA可以分为两类：仅转发(relay-only)、全功能(full-fledged)[5]。
+* Relay-only MTAs: 或者称为Send-only MTAs、small MTAs(SMTP clients)[6]，此类MTA仅将你的email转发到另一个服务器，如果你像我一样仅仅想发送自己的Gmail邮件，此类MTA是最好的选择。SMTP client仅执行某些特定的功能，而不像Full-fledged MTA一样运行完成的SMTP服务器，占用大量的资源开销。这样的MTA不会监听传入的消息，尽在需要发送邮件的时候运行。small MTA通常作为MSA即邮件发送的第一站。
 * Full-fledged MTAs：也称为mail hub，能够处理Internet邮件传送的所有细节，通常这类MTA从Relay-Only MTA接收邮件再进行转发。邮件在Internet的中间MTA转发漫游时，这些MTA使用full-fledged MTA比较合适。
+
+本文仅考虑MSA即Relay-only MTA，选取软件作为MSA应该考虑如下因素：
+* MTA是否可以对邮件进行排队，以便在出现故障时稍后发送
+* MTA可以取代MDA?如果可以，它将处理来自系统的所有邮件。
+* MTA是否支持连接到ISP SMTP服务器的要求？这些要求可能包括特定的身份验证或TLS。
+
+mutt早已支持ESMTP/SMTP，验证当前您使用的mutt是否支持SMTP:
+```bash
+[root@localhost ~]# mutt -v | grep SMTP
++USE_POP  +USE_IMAP  +USE_SMTP
+```
+显然，当前mutt版本已经支持SMTP。那么，我们直接使用mutt自带的SMTP功能进行邮件发送，此时，mutt自己可以作为MSA。如果您需要选择功能更为复杂的MSA，请参考[SendmailAgents](https://gitlab.com/muttmua/mutt/-/wikis/SendmailAgents)。
+
+
 
 ## Reference
 [1] Email agent (infrastructure) https://en.wikipedia.org/wiki/Email_agent_(infrastructure)#cite_note-modularmonolithic-schroder-1
-[2] Postfix vs. Sendmail vs. Exim https://blog.mailtrap.io/postfix-sendmail-exim/?amp=1
-[3] MTA: Mail Transport Agent (SMTP server) https://gitlab.com/muttmua/mutt/-/wikis/MailConcept
-
-
-
-
-* MSA(Message Submission Agent)：接收来自MUA发送的邮件，同MTA合作进行邮件转发
-
-
-
-
-最细粒度的划分：
-* MUA(Message User Agent)
-
-
-* 
-* MRA(Mail Retrieval Agent)(与上述术语不同，)
-
-MSA使用SMTP协议的变种ESMTP协议，MTAs基本上都具备MSA的功能，很少有程序是专门为MSA设计而不具备完整的MTA功能的。MTA和MSA功能都使用端口号25，但是MSA的官方端口是587。MTA接收用户的外来邮件(incoming email)，而MSA接收用户的外发邮件(outgoing email)。从这个细微的差异化描述来看，MSA仅能作为MUA外发邮件的第一站，而MTA可以作为邮件传送过程的任一中转站。
-MSA和MTA的功能分离带来了以下的好处：
-* MSA可在邮件发送之前向作者报告邮件存在的错误，因为MSA直接和MUA交互，因此它可以纠正并报告消息格式中的小错误（例如缺少日期、消息ID、收件人字段或缺少域名的地址），以便作者可以在邮件发送出去之前进行更正。而MTA仅能在邮件送达之后才能报告错误。
-* MSA有专用端口号587，用户总是可以连接到他们的域(domain)来提交新邮件。为了反制垃圾邮件，许多ISP和机构网络限制了通过25端口连接远程MTA的能力。MSA在587端口上的可访问性是的笔记本用户即使在其他网络中也可以通过首选的提交服务器发送邮件。
+[2] SendmailAgents https://gitlab.com/muttmua/mutt/-/wikis/SendmailAgents
+[3] POP3 vs IMAP - What's the difference? https://www.youtube.com/watch?v=SBaARws0hy4&t=337s
+[4] What is SMTP - Simple Mail Transfer Protocol https://www.youtube.com/watch?v=PJo5yOtu7o8
+[5] Postfix vs. Sendmail vs. Exim https://blog.mailtrap.io/postfix-sendmail-exim/?amp=1
+[6] MTA: Mail Transport Agent (SMTP server) https://gitlab.com/muttmua/mutt/-/wikis/MailConcept
