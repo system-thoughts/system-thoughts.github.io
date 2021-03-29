@@ -38,6 +38,22 @@ OK, 说了这么多关于邮件的基本概念，let's get hands dirty，第一�
 yum install mutt
 ```
 
+## Basic Configuration
+mutt默认从系统范围的配置文件（“/etc/Muttrc”）读取其配置的默认值，该文件通常控制系统设置并为所有用户提供可行的默认配置。然后读取个人配置文件（“~/.muttrc”或“~/.mutt/muttrc”），这样，个人设置会根据需要覆盖系统设置。我们采用`~/.mutt/muttrc`对mutt进行配置。
+
+mutt中的变量通过`set var=value`方式配置。存在仅需设置yes/no的`toggle var`（布尔变量），你可以为`toggle var`设置"ask-yes"或者"ask-no"以指定每次使用时给定默认答案进行提示。也可以通过 "unset"、"set var"、"set novar"简化布尔变量的设置。需要注意的是，你配置的mutt变量对应的功能在编译mutt时已启用才会成功设置，否则你会得到“unknown variable”的告警。下面给出最基本的mutt配置：
+
+`ssl_force_tls`表示mutt与所有的远端服务器的连接需要通过TLS协议加密，如果不能成功建立连接，中断通信。需要通过`mutt -v | grep tls`能够打印`--with-gnutls`表示mutt支持TLS。
+
+`abort_nosubject`的默认值是"ask-yes"，表示我们发送邮件还未写邮件主题时，该配置将会提示，默认值为"yes"。将该项设置为"no"，便无需确认。
+
+mutt每次接收到键盘输入时便会更新所有目录的状态。我们也希望即使在空闲时也能收到新邮件的通知，而不需要按下按键。控制这种行为的变量是`timeout`。它表示等待用户输入的最大时间，以秒为单位。如果在指定的时间内没有接收到用户输入，便执行更新操作。变量的默认值是600秒，表示在没有输入的情况下，每10分钟接收一次更新。默认值太高，我们设置为10。
+
+如前所述，每次收到用户输入时，mutt都会查找更新。键盘活动太频繁会导致过多的访问操作，为了限制这个频率，使用`mail check`变量。该变量表示两次扫描之间的最小时间(以秒为单位)。该变量的默认值是5，即使经常按下键，mutt也将每5秒搜索一次新邮件。该值还是太小，尤其是在多邮箱的场景下，可能因为频繁访问降低速度。
+
+默认情况下，索引菜单(显示消息列表)中的电子邮件按日期升序排序，因此更新的电子邮件将显示在底部。要更改电子邮件的排序方式，我们可以使用和设置`sort`变量的值。在本例中，我们设置`reverse-data-received`让更新的电子邮件出现在列表的顶部。其他参数也可以用作排序因子，例如subject和size。
+
+
 ## Retrieve email
 MUA使用POP3/IMAP协议从邮件服务器下载邮件。两者的区别如下[3]：
 * POP3(Post Office Protocol 3)：仅仅下载邮件服务器的inbox目录中的邮件到本地，不会下载sent、draft、deleted目录下的邮件。并且POP3不会同步，并且当email被下载到一台设备上时，email会从邮件服务器中删除。
@@ -54,9 +70,15 @@ POP3和IMAP的比较，如下表所示：
 | All the folders and emails are synchronized | NO | YES |
 | Email stored on the mail server | NO | YES |
 
-
 由于IMAP默认在本地仅缓存(cache)邮件，并不下载邮件，所以默认在无网络的条件下，使用IMAP的MUA是无法阅读邮件的，但是现在很多使用IMAP的MUA都可以设置将邮件下载到本地，而非仅仅缓存。
 POP3协议由于会将邮件下载到本地（下载会删除邮件服务器中的邮件），从而能够节约邮件服务器的空间，然而本地下载的邮件需要备份以免磁盘损坏邮件丢失。
+
+mutt已经支持IMAP，验证当前版本mutt是否支持IMAP：
+```bash
+[root@localhost ~]# mutt -v | grep IMAP
++USE_POP  +USE_IMAP  +USE_SMTP  
+```
+显然，当前mutt版本已经支持IMAP。那么，我们直接使用mutt自带的IMAP功能下载邮件。
 
 
 
