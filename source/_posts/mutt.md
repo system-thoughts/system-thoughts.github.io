@@ -41,9 +41,18 @@ yum install mutt
 ## Basic Configuration
 mutt默认从系统范围的配置文件（“/etc/Muttrc”）读取其配置的默认值，该文件通常控制系统设置并为所有用户提供可行的默认配置。然后读取个人配置文件（“~/.muttrc”或“~/.mutt/muttrc”），这样，个人设置会根据需要覆盖系统设置。我们采用`~/.mutt/muttrc`对mutt进行配置。
 
-mutt中的变量通过`set var=value`方式配置。存在仅需设置yes/no的`toggle var`（布尔变量），你可以为`toggle var`设置"ask-yes"或者"ask-no"以指定每次使用时给定默认答案进行提示。也可以通过 "unset"、"set var"、"set novar"简化布尔变量的设置。需要注意的是，你配置的mutt变量对应的功能在编译mutt时已启用才会成功设置，否则你会得到“unknown variable”的告警。下面给出最基本的mutt配置：
+mutt中的变量通过`set var=value`方式配置。存在仅需设置yes/no的`toggle var`（布尔变量），你可以为`toggle var`设置"ask-yes"或者"ask-no"以指定每次使用时给定默认答案进行提示。也可以通过 "unset"、"set var"、"set novar"简化布尔变量的设置。需要注意的是，你配置的mutt变量对应的功能在编译mutt时已启用才会成功设置，否则你会得到“unknown variable”的告警。所有的mutt配置参数分类可参考[ConfigList](https://gitlab.com/muttmua/mutt/-/wikis/VarNames/List)。
+下面给出最基本的mutt配置：
+```
+# Basic configuration
+set ssl_force_tls = yes
+set abort_nosubject = no
+set timeout = 10
+set mail_check = 60
+set sort = "reverse-date-received"
+```
 
-`ssl_force_tls`表示mutt与所有的远端服务器的连接需要通过TLS协议加密，如果不能成功建立连接，中断通信。需要通过`mutt -v | grep tls`能够打印`--with-gnutls`表示mutt支持TLS。
+`ssl_force_tls`表示mutt与所有的远端服务器的连接需要通过TLS协议加密，如果不能成功建立连接，中断通信。`mutt -v | grep tls`能够打印`--with-gnutls`表示mutt支持TLS。
 
 `abort_nosubject`的默认值是"ask-yes"，表示我们发送邮件还未写邮件主题时，该配置将会提示，默认值为"yes"。将该项设置为"no"，便无需确认。
 
@@ -73,14 +82,34 @@ POP3和IMAP的比较，如下表所示：
 由于IMAP默认在本地仅缓存(cache)邮件，并不下载邮件，所以默认在无网络的条件下，使用IMAP的MUA是无法阅读邮件的，但是现在很多使用IMAP的MUA都可以设置将邮件下载到本地，而非仅仅缓存。
 POP3协议由于会将邮件下载到本地（下载会删除邮件服务器中的邮件），从而能够节约邮件服务器的空间，然而本地下载的邮件需要备份以免磁盘损坏邮件丢失。
 
-mutt已经支持IMAP，验证当前版本mutt是否支持IMAP：
-```bash
-[root@localhost ~]# mutt -v | grep IMAP
-+USE_POP  +USE_IMAP  +USE_SMTP  
+`mutt -v | grep IMAP`能够打印`+USE_IMAP`表示mutt支持IMAP。当前mutt版本已经支持IMAP。那么，我们直接使用mutt自带的IMAP功能下载邮件，关于IMAP相关的配置如下：
 ```
-显然，当前mutt版本已经支持IMAP。那么，我们直接使用mutt自带的IMAP功能下载邮件。
+set from = "foo.bar@gmail.com"
+set realname = "Foo Bar"
 
+# Imap settings
+set imap_user = "foo.bar@gmail.com"
+set imap_pass = "<mutt-app-specific-password>"
 
+# Remote gmail folders
+set folder = "imaps://imap.gmail.com/"
+set spoolfile = "+INBOX"
+set postponed = "+[Gmail]/Drafts"
+set record = "+[Gmail]/Sent Mail"
+set trash = "+[Gmail]/Trash"
+```
+`from`指定的是[email header](https://whatismyipaddress.com/email-header)，此处填写你的邮箱地址。`realname`填写你的真实姓名。
+
+[`imap_user`](http://www.mutt.org/doc/manual/#imap-user)是在IMAP服务器上访问其邮件的用户名，和`from`变量保持一致，此处以gmail账户为例。[`imap_pass`](http://www.mutt.org/doc/manual/#imap-pass)是IMAP账户的密码，谷歌要求不使用Oauth2身份验证方法的应用必须使用特定于应用程序的密码。为了能够从mutt访问我们的gmail帐户，我们必须[打开2-Step Verification](https://support.google.com/accounts/answer/185839)，随后[生成特定于应用程序的密码](https://support.google.com/accounts/answer/185833?hl=en)。
+
+* [`folder`](http://www.mutt.org/doc/manual/#folder)：mailbox的默认位置
+* [`spoolfile`](http://www.mutt.org/doc/manual/#spoolfile):新邮件到达mailbox时，归档的目录
+* [`postponed`](http://www.mutt.org/doc/manual/#postponed)：存储待发送的邮件(草稿)的文件夹
+* [`record`](http://www.mutt.org/doc/manual/#record)：存储已发送的邮件的文件夹
+* [`trash`](http://www.mutt.org/doc/manual/#trash)：存储已删除邮件的文件夹
+
+在客户端执行`mutt`打开邮箱查看gmail邮件：
+{% asset_img 收件箱.png %}
 
 ## Send email
 MTA进行邮件转发使用SMTP协议(Simple Mail Transfer Protocol)。如下这段话，我认为是对SMTP协议的功能的一个良好概括[4]。
@@ -98,15 +127,31 @@ MTA可以分为两类：仅转发(relay-only)、全功能(full-fledged)[5]。
 * MTA可以取代MDA?如果可以，它将处理来自系统的所有邮件。
 * MTA是否支持连接到ISP SMTP服务器的要求？这些要求可能包括特定的身份验证或TLS。
 
-mutt早已支持ESMTP/SMTP，验证当前您使用的mutt是否支持SMTP:
-```bash
-[root@localhost ~]# mutt -v | grep SMTP
-+USE_POP  +USE_IMAP  +USE_SMTP
+mutt早已支持ESMTP/SMTP，`mutt -v | grep SMTP`能够打印`+USE_SMTP`表示mutt支持SMTP。当前mutt版本已经支持SMTP。那么，我们直接使用mutt自带的SMTP功能发送邮件，此时，mutt自己可以作为MSA。如果您需要选择功能更为复杂的MSA，请参考[SendmailAgents](https://gitlab.com/muttmua/mutt/-/wikis/SendmailAgents)。关于SMTP相关的配置如下：
 ```
-显然，当前mutt版本已经支持SMTP。那么，我们直接使用mutt自带的SMTP功能进行邮件发送，此时，mutt自己可以作为MSA。如果您需要选择功能更为复杂的MSA，请参考[SendmailAgents](https://gitlab.com/muttmua/mutt/-/wikis/SendmailAgents)。
+# smtp
+set smtp_url = "smtp://foo.bar@smtp.gmail.com:587"
+set smtp_pass = $imap_pass
+```
+测试邮件发送:
+```bash
+[root@localhost ~]# proxychains4 echo "mail test" | mutt  -s "test email" buweilv@qq.com
+[proxychains] config file found: /etc/proxychains.conf
+[proxychains] preloading /usr/local/lib/libproxychains4.so
+[proxychains] DLL init
+Could not connect to smtp.gmail.com (Connection refused).
+Could not send the message.
+```
+邮件发送失败。使用`mutt -d`选项输出调试信息，调试级别从1~5，日志详细级别相应提高。调试信息输出到`~/.muttdebug*`。上面的发送失败很可能是因为网络不稳定。gmail smtp使用更为安全的TLS协议，端口为[587](https://support.google.com/mail/answer/7126229?visit_id=636857391298706033-411564613&rd=2#cantsignin&zippy=%2Csecurity-certificate-cn-error%2Cmy-email-client-is-crashing-or-emails-are-taking-too-long-to-download)。[ssl_ca_certificates_file](http://www.mutt.org/doc/manual/#ssl_ca_certificates_file)指定的文件包含了所有受信任的CA证书。使用这些CA证书之一签名的任何服务器证书也会被自动接受(仅GnuTLS)。使用`mutt -D`查看默认配置：
+```bash
+[root@localhost ~]# mutt -D | grep ssl_ca_certificates_file
+ssl_ca_certificates_file="/etc/ssl/certs/ca-bundle.crt"
+[root@localhost ~]# rpm -qf /etc/ssl/certs/ca-bundle.crt
+ca-certificates-2020.2.41-80.0.el8_2.noarch
+```
+故使用TLS协议的SMTP服务应该安装`ca-certificates`。Ubuntu环境下的文件命名不同，包名也不同。
 
-
-
+## 
 ## Reference
 [1] Email agent (infrastructure) https://en.wikipedia.org/wiki/Email_agent_(infrastructure)#cite_note-modularmonolithic-schroder-1
 [2] SendmailAgents https://gitlab.com/muttmua/mutt/-/wikis/SendmailAgents
