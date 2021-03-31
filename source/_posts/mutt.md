@@ -151,7 +151,29 @@ ca-certificates-2020.2.41-80.0.el8_2.noarch
 ```
 故使用TLS协议的SMTP服务应该安装`ca-certificates`。Ubuntu环境下的文件命名不同，包名也不同。
 
-## 
+## Interact with mutt
+之前我们使用简单的mutt命令行完成邮件的收发工作。但是，进入mutt交互界面之后，我们应该如何读取邮件，对邮件分类，并且在mutt客户端内编辑邮件、回复邮件呢？首先，我们得了解mutt界面的功能区域。
+mutt提供不同的窗口(menu)与用户进行交互，这些窗口大多基于行(line-based)/条目(entry-based)或基于页面(page-based)。 基于行的窗口是所谓的“索引”(index)窗口（列出当前打开的文件夹的所有邮件）或“别名”(alias)窗口（允许您从列表中选择收件人）。 基于页面的窗口的例子是“pager”（一次显示一封邮件）或“帮助”窗口，其中列出了所有可用的绑定键。
+下图以索引窗口为例，展示mutt交互界面的基本构成。图中的`context senstive`表示此处的内容和窗口类型有关。
+{% asset_img mutt窗口.png %}
+交互界面主要由以下元素构成：
+* context sensitive help line
+* 窗口具体内容
+* context sensitive status line
+* 命令行：显示信息和错误消息以及提示和输入交互式命令
+
+mutt共存在如下窗口(menu)：
+* index: 启动Mutt时最先看到的窗口，展示当前打开邮箱中的email。index窗口是line-based，每一行从左到右分别表示邮件编号、标志（新电子邮件，重要电子邮件，已转发或回复的电子邮件，已标记电子邮件，...）、邮件发送日期、email大小、主题。如果mutt配置`set sort = "threads"`，邮件按照thread（对话）的形式层级展开：当您回复的电子邮件，被对方回复，您可以在下面的“子树”中看到对方的电子邮件。如果您订阅了邮件列表，这种显示方式非常有效。
+* pager：负责显示电子邮件内容。pager的顶部有email header中的主要信息，如发件人，收件人，主题等。你可以配置mutt展示更多email header内容。email header下方便是邮件正文，如果邮件包含附件，会在邮件正文下方显示。如果附件就是文本文件，其内容会直接在pager中显示。为了有更好的观感，可以在mutt中配置在pager中为不同内容显示不同颜色。实际上，任何可以用正则表达式描述的内容都可以着色，例如网址、邮箱地址或表情符号。
+* file browser：是本地或远程文件系统的接口，尚未遇到。
+* sidebar：显示了所有邮箱的列表。该列表可以打开和关闭，它可以主题化，列表样式可以配置。
+* help：旨在为用户提供快速帮助。它列出了键绑定的当前配置及其相关命令(commands)，包括简短的描述，以及当前未绑定函数(或者，可以通过Mutt命令提示符调用它们)。
+* compose menu：撰写窗口具有一个拆分窗口，其中包含收件人、抄送人的信息。另外用户还可以对邮件进行加密、签名。
+* attachment menu：mutt支持发送和接收任意MIME类型的消息，附件窗口详细地展示了邮件的结构。
+* alias menu：帮助用户查找消息的收件人。对于需要联系很多人的用户来说，不需要完全记住地址或名字。mutt的别名机制以及别名窗口还具有按更短的别名(实际别名)对多个地址进行分组的功能，这样用户就不必手动选择每个收件人。
+
+
+
 ## Reference
 [1] Email agent (infrastructure) https://en.wikipedia.org/wiki/Email_agent_(infrastructure)#cite_note-modularmonolithic-schroder-1
 [2] SendmailAgents https://gitlab.com/muttmua/mutt/-/wikis/SendmailAgents
