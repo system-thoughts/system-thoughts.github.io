@@ -1,3 +1,11 @@
+---
+title: Head first for mutt
+date: 2021-03-31T19:21:52+08:00
+tags: [mutt, 社区]
+categories:
+    - devel-tools
+---
+
 给社区发送邮件讨论补丁时，选择一个趁手的客户端会极大提高沟通效率。曾经我通过"git send-email + thunderbird"的工具组合进行邮件的发送和读取，[thunderbird如同outlook的clone版本](https://www.kernel.org/doc/html/v4.10/process/email-clients.html)，对于使用GUI客户端的用户极为友好。然而大多数内核开发者还是会选用mutt邮件客户端，其可配置性极佳，完全命令行的交互方式对于kernel hacker来说是极为友好的。
 
 ## what is mutt and how dose it work?
@@ -68,7 +76,7 @@ MUA使用POP3/IMAP协议从邮件服务器下载邮件。两者的区别如下[3
 * POP3(Post Office Protocol 3)：仅仅下载邮件服务器的inbox目录中的邮件到本地，不会下载sent、draft、deleted目录下的邮件。并且POP3不会同步，并且当email被下载到一台设备上时，email会从邮件服务器中删除。
 * IMAP(Internet Message Access Protocol)：允许在多个客户端上查看邮件（同步），IMAP会将邮件缓存到本地。IMAP还会同步各个设备的目录结构
 
-{% asset_img POP3.png %}
+{% asset_img POP3.PNG %}
 上图展示了两台电脑都从同一email账号下载邮件（均使用POP3协议），两台电脑上的目录结构截然不同，因为POP3不会同步两台电脑中的目录。当有新邮件到来时，第一台电脑先下载了邮件，邮件便会从邮件服务器中删除，第二胎电脑是获取不到新邮件的。不过后面这个问题还好，很多邮件客户端可以设置`leave a copy of messages on the server`。
 
 POP3和IMAP的比较，如下表所示：
@@ -109,14 +117,14 @@ set trash = "+[Gmail]/Trash"
 * [`trash`](http://www.mutt.org/doc/manual/#trash)：存储已删除邮件的文件夹
 
 在客户端执行`mutt`打开邮箱查看gmail邮件：
-{% asset_img 收件箱.png %}
+{% asset_img 收件箱.PNG %}
 
 ## Send email
 MTA进行邮件转发使用SMTP协议(Simple Mail Transfer Protocol)。如下这段话，我认为是对SMTP协议的功能的一个良好概括[4]。
 > SMTP is basically a set of commands that authenticates and directs the transfer of email
 
 更简单方式的记住S(ending) M(ail) T(o) P(eople)。下图展示了通过SMTP协议将邮件从SMTP client途径SMTP server传递到收件人的SMTP server，最终收件用户登录信箱通过POP3/IMAP下载邮件。
-{% asset_img smtp.png %}
+{% asset_img smtp.PNG %}
 
 MTA可以分为两类：仅转发(relay-only)、全功能(full-fledged)[5]。
 * Relay-only MTAs: 或者称为Send-only MTAs、small MTAs(SMTP clients)[6]，此类MTA仅将你的email转发到另一个服务器，如果你像我一样仅仅想发送自己的Gmail邮件，此类MTA是最好的选择。SMTP client仅执行某些特定的功能，而不像Full-fledged MTA一样运行完成的SMTP服务器，占用大量的资源开销。这样的MTA不会监听传入的消息，尽在需要发送邮件的时候运行。small MTA通常作为MSA即邮件发送的第一站。
