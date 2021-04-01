@@ -7,6 +7,12 @@ categories:
     - lock-free
 ---
 
+我们编写的C/C++代码在处理器上实际的执行顺序和其在源码中的顺序可能并不相同。编译器会通过指令重排优化编译效果，CPU也会通过乱序执行优化执行效率。本文将介绍编译时的内存重排。
+
+------
+
+> 原文链接：https://preshing.com/20120625/memory-ordering-at-compile-time/
+
 您写的C/C++源码与其实际在CPU上执行的内存操作顺序可能不同，内存操作可能会根据某些规则重新排序。为了让代码运行得更快，编译器(在编译时)和处理器(在运行时)都会对内存顺序进行更改。
 编译器开发人员和CPU供应商普遍遵循的内存重排的基本规则可以表述为：
 > Thou shalt not modify the behavior of a single-threaded program.
@@ -28,6 +34,46 @@ void foo()
     B = 0;
 }
 ```
+使用GCC 4.6.1在没有编译优化的情况下，会生成如下机器代码：
+```asm
+$ gcc -S -masm=intel foo.c
+$ cat foo.s
+        ...
+        mov     eax, DWORD PTR _B  (redo this at home...)
+        add     eax, 1
+        mov     DWORD PTR _A, eax
+        mov     DWORD PTR _B, 0
+        ...
+```
+对全局变量B的内存存储发生在对A的内存存储之后，和源码中一样。
+`-O2`编译优化之后的机器代码如下：
+```asm
+$ gcc -O2 -S -masm=intel foo.c
+$ cat foo.s
+        ...
+        mov     eax, DWORD PTR B
+        mov     DWORD PTR B, 0
+        add     eax, 1
+        mov     DWORD PTR A, eax
+        ...
+```
+这一次，编译器将全局变量B的存储放到全局变量A的存储之前。这并未打破内存排序的基本规则，单线程永远感知不到差别。
+
+然而，在编写无锁代码时，此类编译器重新排序可能会导致问题。下面的代码是一个经常被引用的示例，全局变量`IsPublished`用于指示全局变量`Value`的修改已经完成：
+```c
+int Value;
+int IsPublished = 0;
+ 
+void sendValue(int x)
+{
+    Value = x;
+    IsPublished = 1;
+}
+```
+想象一下，如果编译器将`IsPublished`的内存写重排到`Value`内存写之前，会发生什么？即使是在单处理器系统上，也会遇到问题:一个线程的两次内存写操作可能会被OS抢占，让其他线程相信`Value`已经更新，而实际却没有。
+
+
+
 
 
 

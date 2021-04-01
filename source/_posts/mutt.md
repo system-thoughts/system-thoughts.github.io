@@ -3,7 +3,7 @@ title: Head first for mutt
 date: 2021-03-31T19:21:52+08:00
 tags: [mutt, 社区]
 categories:
-    - devel-tools
+    - Linux tools
 ---
 
 给社区发送邮件讨论补丁时，选择一个趁手的客户端会极大提高沟通效率。曾经我通过"git send-email + thunderbird"的工具组合进行邮件的发送和读取，[thunderbird如同outlook的clone版本](https://www.kernel.org/doc/html/v4.10/process/email-clients.html)，对于使用GUI客户端的用户极为友好。然而大多数内核开发者还是会选用mutt邮件客户端，其可配置性极佳，完全命令行的交互方式对于kernel hacker来说是极为友好的。
@@ -179,6 +179,14 @@ mutt共存在如下窗口(menu)：
 * compose menu：撰写窗口具有一个拆分窗口，其中包含收件人、抄送人的信息。另外用户还可以对邮件进行加密、签名。
 * attachment menu：mutt支持发送和接收任意MIME类型的消息，附件窗口详细地展示了邮件的结构。
 * alias menu：帮助用户查找消息的收件人。对于需要联系很多人的用户来说，不需要完全记住地址或名字。mutt的别名机制以及别名窗口还具有按更短的别名(实际别名)对多个地址进行分组的功能，这样用户就不必手动选择每个收件人。
+
+mutt作为文本邮件客户端，需要完全依赖键盘完成基本操作。当前介绍基于行/条目窗口的常规按键，以index窗口为例：
+* 移动：k/j 上下移动, Z/z 上下翻页, =/* 跳转到第一封/最后一封邮件，<Number> 跳至序号处（不进入邮件）
+* 基本操作：q退出当前窗口，<Enter>打开选中邮件，? 查看当前窗口的键绑定
+* /在当前文件夹搜索
+
+针对index窗口有些专有功能的按键：
+* d:删除当前邮件, s:将邮件移动至指定文件夹, m:创建新邮件, r:回复当前邮件
 
 
 
