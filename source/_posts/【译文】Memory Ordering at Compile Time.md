@@ -17,7 +17,7 @@ categories:
 编译器开发人员和CPU供应商普遍遵循的内存重排的基本规则可以表述为：
 > Thou shalt not modify the behavior of a single-threaded program.
 
-依据单线程程序行为不可修改的原则，程序员在写单线程的代码时基本不会注意到内存重排。在多线程编程中，它也经常被忽略，因为互斥(mutexes)、信号量(semaphores)和事件(events)都是为了防止在它们的调用位置附近进行内存重排而设计的。只有在使用无锁技术时（线程之间共享内存而没有任何相互排斥的情况），内存重排的效果才能够被明显地{% post_path 当场抓获内存重排 '观察到' %}。
+依据单线程程序行为不可修改的原则，程序员在写单线程的代码时基本不会注意到内存重排。在多线程编程中，它也经常被忽略，因为互斥(mutexes)、信号量(semaphores)和事件(events)都是为了防止在它们的调用位置附近进行内存重排而设计的。只有在使用无锁技术时（线程之间共享内存而没有任何相互排斥的情况），内存重排的效果才能够被明显地{% post_link 当场抓获内存重排 '观察到' %}。
 
 注意，在为多核平台编写无锁代码时，有些情况可以避免内存重排的麻烦，正如我在introduction to lock-free programming中提到的那样，可以利用顺序一致(sequentially consistent)的类型，例如Java的`volatile`变量或C ++ 11原子变量，这可能会牺牲一点性能。本文我不会细究这些情况，我将重点讨论编译器对常规、非顺序一致性类型的内存排序的影响。
 
@@ -71,10 +71,55 @@ void sendValue(int x)
 }
 ```
 想象一下，如果编译器将`IsPublished`的内存写重排到`Value`内存写之前，会发生什么？即使是在单处理器系统上，也会遇到问题:一个线程的两次内存写操作可能会被OS抢占，让其他线程相信`Value`已经更新，而实际却没有。
+当然，编译器可能未对这些操作进行重新排序，生成的机器代码作为无锁操作可以在任何强内存模型(strong memory model)的多核CPU（例如x86/64）上或在单处理器环境中正常运行。如果没有发生内存重排，我们会很幸运。然而，更好的做法是认识到共享变量存在内存重新排序的可能性，并确保正确的执行顺序。
 
+## Explicit Compiler Barriers
+防止编译器内存重排最简单的方法是使用编译器屏障(compiler barrier)指令。我们在{% post_link 当场抓获内存重排 '上一篇文章中' %}已经提及编译器屏障。下面是GCC的完全编译器屏障(full compiler barrier)。Microsoft C++的[_ReadWriteBarrier](https://docs.microsoft.com/en-us/cpp/intrinsics/readwritebarrier?redirectedfrom=MSDN&view=msvc-160)具有相同功能。
+```c
+int A, B;
 
+void foo()
+{
+    A = B + 1;
+    asm volatile("" ::: "memory");
+    B = 0;
+}
+```
+加上完全编译器屏障并保持编译器优化，观察内存存储指令并未重排：
+```asm
+$ gcc -O2 -S -masm=intel foo.c
+$ cat foo.s
+        ...
+        mov     eax, DWORD PTR _B
+        add     eax, 1
+        mov     DWORD PTR _A, eax
+        mov     DWORD PTR _B, 0
+        ...
+```
+同样，如果我们要保证`sendMessage`示例在单处理器系统数正常工作，那么我们至少必须在此处引入编译器屏障。不仅发送操作需要编译器屏障防止内存写操作重排，接收方也需要在内存读操作之间加入屏障。
+```c
+#define COMPILER_BARRIER() asm volatile("" ::: "memory")
 
+int Value;
+int IsPublished = 0;
 
+void sendValue(int x)
+{
+    Value = x;
+    COMPILER_BARRIER();          // prevent reordering of stores
+    IsPublished = 1;
+}
 
+int tryRecvValue()
+{
+    if (IsPublished)
+    {
+        COMPILER_BARRIER();      // prevent reordering of loads
+        return Value;
+    }
+    return -1;  // or some other value to mean not yet received
+}
+```
+如前所述，编译器屏障足以防止单处理器系统上的内存重排。如今在多核计算已经成为常态。如果我们想要确保我们的指令交互在任何架构的多处理器环境中都以期望的顺序发生，那么编译器屏障是不够的。我们需要发送`CPU fence`指令，或执行任何在运行时充当内存屏障的操作。我将在下一篇文章中会更多地介绍这块内容，内存屏障就像源代码版本控制操作一样。
 
-
+Linux内核以宏的形式提供了多个CPU fence指令，例如`smb_rmb`。这些宏在单处理器系统中会被编译成简单的编译器屏障。
