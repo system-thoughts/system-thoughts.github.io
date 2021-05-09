@@ -460,3 +460,9 @@ plugins:
   - position: sidebar
     template: |
       <is-palette palette="#673ab7,#3f51b5,#2196f3,#009688,#4caf50,#ff9800,#ff5722,#795548,#607D8B,#2a2b33" col="5"></is-palette>
+
+  - position: post
+    template: |
+      <div class="social-share" data-disabled="qzone,qq"></div>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/css/share.min.css">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/js/social-share.min.js"></script>
