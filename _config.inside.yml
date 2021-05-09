@@ -452,13 +452,8 @@ pwa:
 #       excerpt: Content encrypted
 plugins:
   # 加载脚本
-  - palette
-
-  # 插入到页面
-  # palette="" 颜色列表
-  # col="" 每行展示的个数
-  - position: sidebar
-    theme: [
+  - palette:
+      theme: [
         '#673ab7',
         '#3f51b5',
         '#2196f3',
