@@ -463,6 +463,6 @@ plugins:
 
   - position: post
     template: |
-      <div class="social-share" data-disabled="qzone,qq"></div>
+      <div class="social-share" data-disabled="qzone,qq,diandian,tencent"></div>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/css/share.min.css">
       <script src="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/js/social-share.min.js"></script>
