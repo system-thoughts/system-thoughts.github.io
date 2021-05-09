@@ -151,10 +151,10 @@ page:
   # toc: false
 
   # Display reward, default to `false`
-  reward: true
+  reward: false
 
   # Display copyright notice, default to `false`
-  copyright: true
+  copyright: false
 
 
 # Post
@@ -450,3 +450,13 @@ pwa:
 #   - cipher:
 #       placeholder: Passcode is required
 #       excerpt: Content encrypted
+plugins:
+  # 加载脚本
+  - palette
+
+  # 插入到页面
+  # palette="" 颜色列表
+  # col="" 每行展示的个数
+  - position: sidebar
+    template: |
+      <is-palette palette="#673ab7,#3f51b5,#2196f3,#009688,#4caf50,#ff9800,#ff5722,#795548,#607D8B,#2a2b33" col="5"></is-palette>
