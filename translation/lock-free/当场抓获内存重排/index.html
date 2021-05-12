@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head><!-- hexo injector head_begin start -->
+<script src="/config.bca40e57430113d96713.js"></script>
+<!-- hexo injector head_begin end -->
+<meta charset="utf-8">
+<title>【译文】当场抓获内存重排 - System Thoughts</title>
+<base href="/">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<link rel="canonical" href="https://system-thoughts.github.io/translation/lock-free/%E5%BD%93%E5%9C%BA%E6%8A%93%E8%8E%B7%E5%86%85%E5%AD%98%E9%87%8D%E6%8E%92/">
+<link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+<meta name="description" content="原文链接：https:&#x2F;&#x2F;preshing.com&#x2F;20120515&#x2F;memory-reordering-caught-in-the-act&#x2F;  用C&#x2F;C++编写无锁代码时，必须特别注意强制执行正确的内存顺序。否则，可能会发生令人惊讶的事情。 Intel SDM卷3第8.2.3节举了几个例子。这是最简单的例子之一。假设您在内存中保存了两个整数X和Y，初始值都为0。两个并行运行的处理器执行以下机器">
+<meta property="og:type" content="website">
+<meta property="og:title" content="【译文】当场抓获内存重排">
+<meta property="og:url" content="https://system-thoughts.github.io/translation/lock-free/%E5%BD%93%E5%9C%BA%E6%8A%93%E8%8E%B7%E5%86%85%E5%AD%98%E9%87%8D%E6%8E%92/index.html">
+<meta property="og:site_name" content="System Thoughts">
+<meta property="og:description" content="原文链接：https:&#x2F;&#x2F;preshing.com&#x2F;20120515&#x2F;memory-reordering-caught-in-the-act&#x2F;  用C&#x2F;C++编写无锁代码时，必须特别注意强制执行正确的内存顺序。否则，可能会发生令人惊讶的事情。 Intel SDM卷3第8.2.3节举了几个例子。这是最简单的例子之一。假设您在内存中保存了两个整数X和Y，初始值都为0。两个并行运行的处理器执行以下机器">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://system-thoughts.github.io/images/avatar.jpg">
+<meta property="article:published_time" content="2021-03-22T03:29:29.000Z">
+<meta property="article:modified_time" content="2021-05-12T09:49:32.332Z">
+<meta property="article:author" content="Lv Ying">
+<meta property="article:tag" content="lock-free">
+<meta property="article:tag" content="memory-reordering">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://system-thoughts.github.io/images/avatar.jpg">
+
+
+<!-- hexo injector head_end start --><style is="theme">html{--inside-accent-color:#2a2b33;--inside-foreground-color:#363636;--inside-border-color:#e0e0e0;--inside-background:#f3f6f7;--inside-sidebar-background:#2a2b33;--inside-card-background:#fff;--inside-font-base:'Josefin Sans','PingFang SC';--inside-font-logo:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;--inside-font-menu:Baloo Bhaijaan,'Josefin Sans','PingFang SC';--inside-font-heading:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;--inside-font-label:Montserrat,'Josefin Sans','PingFang SC';--inside-font-code:Inconsolata,monospace;--inside-font-print:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;--inside-content-width:660px;--inside-highlight-00:#ffffff;--inside-highlight-01:#e0e0e0;--inside-highlight-02:#f3f6f7;--inside-highlight-03:#95a5b3;--inside-highlight-04:#363636;--inside-highlight-05:#262b2f;--inside-highlight-06:#000000;--inside-highlight-07:#000000;--inside-highlight-08:#5d6c7b;--inside-highlight-09:#40464a;--inside-highlight-0a:#2980b9;--inside-highlight-0b:#be516e;--inside-highlight-0c:#237dac;--inside-highlight-0d:#944770;--inside-highlight-0e:#239371;--inside-highlight-0f:#edf0f3;--inside-card-color:#fff;--inside-accent-color-005:rgba(42,43,51,.05);--inside-accent-color-01:rgba(42,43,51,.1);--inside-accent-color-02:rgba(42,43,51,.2);--inside-accent-color-04:rgba(42,43,51,.4);--inside-accent-color-08:rgba(42,43,51,.8)}</style>
+<script src="/disqus.dc4ff420.js"></script>
+<link href="//fonts.googleapis.com/css?family=Baloo+Bhaijaan|Inconsolata|Josefin+Sans|Montserrat" rel="stylesheet"></link>
+<script src="/palette.ca0dd104.js"></script>
+
+<script src="/theme.996263e8d7ba25f9cae2.js"></script>
+<link href="/styles.0d44a7054d712e5df0b5.css" rel="stylesheet"><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.2.0"></head>
+<body lang="en"><!-- hexo injector body_begin start --><is-a></is-a><!-- hexo injector body_begin end --><!-- hexo injector body_end start --><script src="/runtime.91a02d1be9f8a4fe75ea.js"></script><script src="/polyfills.9aa2dadd7ec0b15063ad.js"></script><script src="/main.eb06322b117f59a88792.js"></script><!-- hexo injector body_end end --></body>
+</html>
