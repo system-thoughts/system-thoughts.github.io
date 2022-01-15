@@ -13,11 +13,9 @@ x86实模式出现于Intel 8088时期，8088 CPU公有20位地址总线，8个16
 > 物理地址 = 段寄存器 << 4 + 段内偏移
 
 如此，通过16bit的段寄存器和段内偏移便能寻址20位地址空间，计算出的地址便是实际物理地址，这也是“实”模式的由来。
-系统上电后，BIOS最初便在16bit实模式下工作。x86-64环境下，BIOS的第一条指令位于CS(0xFFFF0000h):IP(0xFFF0h)所指向的地址。刚才提及，上电之初，BIOS在16bit实模式下工作，最大寻址1MB，按照实模式下的寻址规则：`(0xFFFF0000h << 4) + (0xFFF0h) = 0xFFF0FFF0h`，已经远大于1MB。其实不然，分段模式下的每个段寄存器寻址的实际物理地址缓存在`段描述符高速缓冲寄存器`中，这个寄存器对于程序员是不可见的，段描述符高速缓冲寄存器就是通过硬件加速分段模式下的寻址速度。`CS`段寄存器对应的段描述符高速缓冲寄存器存储的是物理地址`0xFFFFFFF0h`，该物理地址称为[Reset vector](https://en.wikipedia.org/wiki/Reset_vector)。但是`0xFFFFFFF0h`仍然高于实模式下的最大物理地址空间1MB，为啥BIOS可以访问到了？
 
 ## First Instruction
-`0xFFFFFFF0h`实际是[BIOS ROM映射到地址空间的地址](https://www.coreboot.org/Developer_Manual/Memory_map)，而非在实模式寻址RAM的物理地址：
-> 0xFFFE_0000 - 0xFFFF_FFFF: 128 kByte ROM mapped into address space
+系统上电后，BIOS最初便在16bit实模式下工作。x86-64环境下，BIOS的第一条指令位于CS(0xF000h):IP(0xFFF0h)所指向的地址。刚才提及，上电之初，BIOS在16bit实模式下工作，最大寻址1MB，按照实模式下的寻址规则：`(0xF000h << 4) + (0xFFF0h) = 0xFFFF0h`。那么开机启动之后，第一条指令会在`0xFFFF0h`执行？其实不然，开机执行的第一条指令在`0xfffffff0h`处执行。分段模式下的每个段寄存器寻址的实际物理地址缓存在`段描述符高速缓冲寄存器`中，这个寄存器对于程序员是不可见的，段描述符高速缓冲寄存器就是通过硬件加速分段模式下的寻址速度。`CS`段寄存器对应的段描述符高速缓冲寄存器存储的是物理地址`0xFFFFFFF0h`，该物理地址称为[Reset vector](https://en.wikipedia.org/wiki/Reset_vector)。
 
 执行`qemu-kvm -monitor stdio -S`命令查看机器启动执行的第一条指令：
 ```shell
@@ -43,6 +41,9 @@ CR0=60000010 CR2=00000000 CR3=00000000 CR4=00000000
 ...
 ```
 `CS`寄存器为`0xf000`，`EIP`寄存器为`0000fff0`，`CS`寄存器对应的段基址是`0xffff0000`，该段最能容纳`0x0000ffff`字节。如此，起始物理地址便是`0xfffffff0`，便是`Reset vector`。
+
+但是`0xFFFFFFF0h`仍然高于实模式下的最大物理地址空间1MB，为啥BIOS可以访问到了？`0xFFFFFFF0h`实际是[BIOS ROM映射到地址空间的地址](https://www.coreboot.org/Developer_Manual/Memory_map)，而非在实模式寻址RAM的物理地址：
+> 0xFFFE_0000 - 0xFFFF_FFFF: 128 kByte ROM mapped into address space
 
 查看SeaBIOS源码，BIOS第一条指令会执行什么：
 ```asm
@@ -165,7 +166,7 @@ transition32_nmi_off:
 
         jmpl *%edx        
 ```
-`DECLFUNC`宏定义名为`.text.asm.transition32`的section，`transition32`以及`transition32_nmi_off`都在给section，这两个符号通过`.global`对链接器可见。
+`DECLFUNC`宏定义名为`.text.asm.transition32`的section，`transition32`以及`transition32_nmi_off`都在该section，这两个符号通过`.global`对链接器可见。
 
 首先关中断并清空方向标志位。过去，为了节省存储空间，很多功能都被合并集成在一个有“空间”的芯片上，控制NMI中断使能、CMOS控制器、RTC时钟都放在CMOS中。
 ```c
@@ -187,14 +188,14 @@ outb (0x70, (NMI_disable_bit << 7) | (selected CMOS register number));
 ```asm
 inb (0x71, (NMI_disable_bit << 7) | (selected CMOS register number));
 ```
-随后开启A20总线以便访问1MB以上的物理地址空间。8086/8088实模式下，最大能够访问的物理地址是`0xFFFF:0XFFFF`即`0x10FFEF`。访问该物理地址需要21根地址线，然而8086/8088仅有20根地址总线，因此改地址会被截断成`0x0FFEF`。后续80x86 CPU为了兼容这种回环现象，设计了A20总线，当A20总线为1，第21位以及更高位都有效；反之，高位为0，兼容回环现象。
+随后开启A20总线以便访问1MB以上的物理地址空间。8086/8088实模式下，最大能够访问的物理地址是`0xFFFF:0xFFFF`即`0x10FFEF`。访问该物理地址需要21根地址线，然而8086/8088仅有20根地址总线，因此改地址会被截断成`0x0FFEF`。后续80x86 CPU为了兼容这种回环现象，设计了A20总线，当A20总线为1，第21位以及更高位都有效；反之，高位为0，兼容回环现象。
 ```c
 // PORT_A20 bitdefs
 #define PORT_A20 0x0092
 #define A20_ENABLE_BIT 0x02
 ```
-可见通过往A20 `0x92`I/O端口置位第2bit位开启A20总线。
-随后通过`lidtw`和`lgdtw`两条命令加载`idtr`和`gdtr`寄存器，设定中断描述符表和全局描述符表。32bit保护模式下的分段寻址和实模式有较大差异。偏移值同实模式一样，只不过变成了32bit。段值仍然放在以前的16bit寄存器，不过寄存器存放的不是段机制，而是段选择符。通过段选择符不仅能够索引全局描述符表获取段描述符中的基址，还能够描述当前访问操作的特权级实现段保护。
+可见通过往A20 `0x92`I/O端口置位第2 bit位开启A20总线。
+随后通过`lidtw`和`lgdtw`两条命令加载`idtr`和`gdtr`寄存器，设定中断描述符表和全局描述符表。32bit保护模式下的分段寻址和实模式有较大差异。偏移值同实模式一样，只不过变成了32bit。段值仍然放在以前的16bit寄存器，不过寄存器存放的不是段基址，而是段选择符。通过段选择符不仅能够索引全局/局部描述符表获取段描述符中的基址，还能够描述当前访问操作的特权级实现段保护。
 {% asset_img segment_selector.PNG %}
 
 段描述符表`rombios32_gdt_48`如代码所示，对比段描述符结构，则一目了然。
@@ -245,7 +246,7 @@ src/x86.h:
 #define CR0_PE (1<<0)  // Protection enable
 ```
 
-最终，通过长跳转`ljmpl`跳转至32bit保护模式，`CS`寄存器存储的段选择符为`01000B`,即`RPL = 0`,执行在特权级0上；`TI = 0`，段选择符索引GDT；`Index = 1`，索引GDT中的第一个段描述符。段描述符中基址是`0x0`，`Segment Limit`是`0xfffff`，`D/B`flag置位，因此该段是32bit的段。
+最终，通过长跳转`ljmpl`跳转至32bit保护模式，`CS`寄存器存储的段选择符为`01000B`,即`RPL = 0`,执行在特权级0上；`TI = 0`，段选择符索引GDT；`Index = 1`，索引GDT中的第一个段描述符。段描述符中基址是`0x0`，`Segment Limit`是`0xfffff`，`G(Granularity)`flag置位，表示该段的范围是`0x100000 * 4KB = 4GB`。
 ```c
 src/config.h:
 // Segment definitions in protected mode (see rombios32_gdt in misc.c)
@@ -255,7 +256,7 @@ src/config.h:
 
 这里的1f要区分清楚。指的是前方第一个标签为“1”的位置，而不是代表十六进制数0x1F。下一个标签“1”就是这个指令的下一条。所以，看起来这个跳转是没有价值的。实际上，在cr0寄存器被设定好之前，下一条指令已经被放入流水线。而再放入的时候这条指令还是在实模式下的。所以这个ljmp指令是为了清空流水线，确保下一条指令在保护模式下执行。[1]
 
-随后初始化所有的数据段寄存器`ss`、`ds`、`es`、`fs`、`gs`为`$SEG32_MODE32_DS`。段描述符中基址是`0x0`，`Segment Limit`是`0xfffff`，`D/B`flag置位，因此该段是32bit的段。进入实模式后，所有段基址都是0，段的寻址范围都是`0xfffff`，即所有段寻址的地址空间都是`[0, 4G)`,当前地址空间不再是分段的，而是完整的一大块，即“平坦模型”。
+随后初始化所有的数据段寄存器`ss`、`ds`、`es`、`fs`、`gs`为`$SEG32_MODE32_DS`。段描述符中基址是`0x0`，`Segment Limit`是`0xfffff`，`G(Granularity)`flag置位，段的大小都是4GB。进入实模式后，所有段寻址的地址空间都是`[0, 4G)`,当前地址空间不再是分段的，而是完整的一大块，即“平坦模型”。
 
 随后跳转到32bit保护模式下的`handle_post`函数。
 
@@ -329,7 +330,11 @@ startBoot(void)
     call16_int(0x19, &br);
 }
 ```
-bootloader工作在16bit的实模式，`call16_int`切换至实模式并调用`int 0x19h`软件中断，进入BIOS的BOOT阶段。
+bootloader工作在16bit的实模式，`call16_int`切换至实模式并调用`int 0x19h`软件中断(software-generated interrupt)，进入BIOS的BOOT阶段。
+> The INT n instruction permits interrupts to be generated from within software by supplying an interrupt vector number as an operand.
+
+软件（生成）中断源自CPU主动执行特定的指令（x86下的int指令）产生中断，而非源自CPU接收的外部硬件产生的中断。
+
 ```c
 src/stacks.h:
 #define call16_int(nr, callregs) do {                           \
