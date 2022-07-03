@@ -4,7 +4,11 @@ date: 2022-06-23T12:16:09+08:00
 tags: boot initramfs
 categories: boot
 ---
-系统启动过程的最后一个阶段：挂载根文件系统、执行根文件系统中的init进程完成到用户空间的切换。然而根文件系统可能是在不同的硬件设备上，如SCSI硬盘、SATA硬盘、Flash设备等，后续会出现更多的硬件设备；根文件系统可以是xfs、ext4、NFS等不同的文件系统；为了成功挂载根文件系统，内核需要具备相应的设备驱动、文件系统驱动，如果为了兼容所有的根文件系统，将所有相关驱动编译进内核，会导致内核大小扩大，并在实际环境中引入一些无用的驱动。
+
+> [Notice] kernel version: 5.18(4b0986a3613c)
+> 本文中的大部分代码段都有代码删除
+
+系统启动过程的最后一个阶段：挂载根文件系统、执行根文件系统中的init程序完成到用户空间的切换。然而根文件系统可能是在不同的硬件设备上，如SCSI硬盘、SATA硬盘、Flash设备等，后续会出现更多的硬件设备；根文件系统可以是xfs、ext4、NFS等不同的文件系统；为了成功挂载根文件系统，内核需要具备相应的设备驱动、文件系统驱动，如果为了兼容所有的根文件系统，将所有相关驱动编译进内核，会增大内核大小，并在实际环境中引入一些无用的驱动。
 
 initramfs作为一个过渡文件系统解决了挂载根文件系统的兼容性。其中包含了必要的硬件设备、文件系统驱动以及驱动的加载工具及其运行环境。initramfs可以编译进内核也可以作为单独文件由bootloader加载入内存，在内核初始化的最后阶段，会解压initramfs，运行其中的init程序完成根文件系统挂载，并执行根文件系统中的init程序，完成内核空间到用户空间的切换。
 
@@ -17,11 +21,11 @@ initrd与initramfs之间的主要区别是initrd基于ramdisk机制，而initram
 ramdisk是将固定大小的内存模拟成块设备，需要文件系统(如ext2)格式化块设备以存取数据。同块设备一样，ramdisk的数据读取也会用到磁盘缓存机制(disk caching mechanisms, "page cache" for file data, "dentry cache" for directory entries)。显然，ramdisk有些多此一举，文件实际存储在内存中，但文件读取还要通过基于内存的磁盘缓存。ramdisk机制的缺点原文概括的十分精准：
 > this wastes memory (and memory bus bandwidth), creates unnecessary work for the CPU, and pollutes the CPU caches.  (There are tricks to avoid this copying by playing with the page tables, but they're unpleasantly complicated and turn out to be about as expensive as the copying anyway.
 
-既然，访问文件都要经过磁盘cache，为何不直接将文件直接保存在磁盘cache中？Linus实现了一个伪文件系统(dummy filesystem)ramfs，完成了最低限度的VFS接口实现即文件创建时能够在inode cache中创建相应的inode和dentry，并将文件直接保存在磁盘cache中。存储文件的页面不会被标记为clean，因此保存在磁盘cache中的文件页面不会被回收，除非文件被删除。
+既然访问文件都要经过磁盘cache，为何不直接将文件保存在磁盘cache？Linus实现了一个伪文件系统(dummy filesystem)ramfs，完成了最低限度的VFS接口实现，即文件创建时能够在inode cache中创建相应的inode和dentry，并将文件直接保存在磁盘cache中。存储文件的页面不会被标记为clean，因此保存在磁盘cache中的文件页面不会被回收，除非文件被删除。
 
 ramfs有两个显著的缺点：
 * 内存占用无限制，只要愿意往ramfs存储数据，文件便会占用内存，而不受限
-* 基于上一点，只有root用户能够往ramfs中读/写数据
+* 基于上一点，只有root用户能够在ramfs中读/写数据
 
 社区在ramfs的基础上开发了tmpfs，tmpfs增加了`size limits`，不能无限制地往内存中写文件；并支持将磁盘缓存中的文件数据写入swap空间。因此，tmpfs支持普通用户访问其挂载点。
 
@@ -117,13 +121,13 @@ kernel_init
 
 `kernel_init_freeable`完成内核部分子系统初始化，如workqueue、启动其他CPU、SMP初始化等操作。待所有CPU上线、进程、内存核心子系统初始化完成，调用`do_basic_setup`完成其他初始化操作，其中包括`do_initcalls`执行`init`段中的函数即调用`initcall`回调函数，`populate_rootfs`调用`do_populate_rootfs`完成initramfs解压到rootfs的工作，或者通过`prepare_namespace`通过initrd完成实际根文件系统的挂载。
 通过`run_init_process`启动可执行程序，完成从内核空间到用户空间的切换，可以是如下程序：
-| var | initial value | <kernel cmdline>/CONFIG | description |
+| var | initial value | kernel cmdline/CONFIG | description |
 |---|---|---|---|
 | ramdisk_execute_command | "/init" | "rdinit=" |  Run specified binary instead of /init from the ramdisk,used for early userspace startup. |
 | execute_command | NULL | "init=" | Run specified binary instead of /sbin/init as init process. |
 | CONFIG_DEFAULT_INIT | "" | CONFIG_DEFAULT_INIT | Default init path |
 
-如果上述路径的init程序未成功执行，则依次尝试运行如下程序：`/sbin/init`、`/etc/init`、`/bin/init`、`/bin/sh`。通过initramfs过渡和通过initrd过渡获得的init程序职责是不同的。通过initrd过渡，由于已经完成了实际根文件系统的挂载，这里运行的init程序是实际根文件系统的init程序，完成内核空间到用户空间的切换，并完成剩余的初始化。然而，initramfs过渡得到的init程序还肩负着挂载实际根文件系统的责任！
+如果上述路径的init程序未成功执行，则依次尝试运行如下程序：`/sbin/init`、`/etc/init`、`/bin/init`、`/bin/sh`。通过initramfs过渡和通过initrd过渡获得的init程序职责是不同的。通过initrd过渡，由于已经完成了实际根文件系统的挂载，这里运行的init程序是实际根文件系统的init程序。然而，initramfs过渡得到的init程序还肩负着挂载实际根文件系统的责任！
 
 ### initramfs unpack
 ```c
@@ -184,6 +188,73 @@ done:
 2. 若内核未配置`CONFIG_INITRAMFS_FORCE`（忽略bootloader传入的initramfs）且(通过`initrd=<path>`或者`initrdmem=<physical addr>`)指定了initramfs地址(`initrd_start`不为0)，则将指定的initramfs解压至rootfs中，否则直接跳至4
 3. 若2中的initramfs解压失败，则认为2中解压的image不是initramfs，而是initrd。调用`populate_initrd_image`在rootfs中创建`/initrd.image`文件，并将initrd的内容写入到文件
 4. 如果没配置内核启动项参数`retain_initrd`、`keepinitrd`，而且指定了initramfs地址，则调用`kexec_free_initrd`释放initramfs与crashkernel不重叠部分的内存区域，若两者无重叠，则完全释放指定的initramfs内存区域
+
+`__initramfs_start`在`include/asm-generic/vmlinux.lds.h`中定义，在`include/linux/initrd.h`中对外声明，内核包含`include/linux/initrd.h`文件，即可访问`__initramfs_start`变量：
+```c
+include/linux/initrd.h:
+extern char __initramfs_start[];
+
+include/asm-generic/vmlinux.lds.h:
+#ifdef CONFIG_BLK_DEV_INITRD
+#define INIT_RAM_FS                                                     \
+        . = ALIGN(4);                                                   \
+        __initramfs_start = .;                                          \
+        KEEP(*(.init.ramfs))                                            \
+        . = ALIGN(8);                                                   \
+        KEEP(*(.init.ramfs.info))
+#else
+#define INIT_RAM_FS
+#endif
+
+arch/x86/kernel/vmlinux.lds.S:
+#include <asm-generic/vmlinux.lds.h>
+
+arch/x86/boot/compressed/vmlinux.lds.S:
+#include <asm-generic/vmlinux.lds.h>
+
+scripts/Makefile.build:
+# Linker scripts preprocessor (.lds.S -> .lds)
+# ---------------------------------------------------------------------------
+quiet_cmd_cpp_lds_S = LDS     $@  
+      cmd_cpp_lds_S = $(CPP) $(cpp_flags) -P -U$(ARCH) \
+                             -D__ASSEMBLY__ -DLINKER_SCRIPT -o $@ $<
+
+$(obj)/%.lds: $(src)/%.lds.S FORCE
+        $(call if_changed_dep,cpp_lds_S)
+```
+
+vmlinux.lds是内核构建过程所使用的链接脚本，这里vmlinux.lds通过vmlinux.lds.S预编译生成，这样可以利用条件编译，根据不同的内核配置生成不同的链接脚本。参考内核文档`Documentation/kbuild/makefiles.rst`
+>        When the vmlinux image is built, the linker script
+>        arch/$(SRCARCH)/kernel/vmlinux.lds is used.
+>        The script is a preprocessed variant of the file vmlinux.lds.S
+>        located in the same directory.
+>        kbuild knows .lds files and includes a rule `*lds.S` -> `*lds`.
+>
+>        Example::
+>
+>                #arch/x86/kernel/Makefile
+>                extra-y := vmlinux.lds
+>
+>        The assignment to extra-y is used to tell kbuild to build the
+>        target vmlinux.lds.
+>        The assignment to $(CPPFLAGS_vmlinux.lds) tells kbuild to use the
+>        specified options when building the target vmlinux.lds.
+>
+>        When building the `*.lds` target, kbuild uses the variables::
+>
+>                KBUILD_CPPFLAGS : Set in top-level Makefile
+>                cppflags-y      : May be set in the kbuild makefile
+>                CPPFLAGS_$(@F)  : Target-specific flags.
+>                                Note that the full filename is used in this
+>                                assignment.
+>
+>        The kbuild infrastructure for `*lds` files is used in several
+>        architecture-specific files.
+
+`Documentation/kbuild/makefiles.rst`连接脚本定义了符号`__initramfs_start`所在地址：
+> special symbol ‘.’, which is the location counter. 
+
+链接脚本定义的符号与普通符号（在程序中定义的符号）的区别是链接脚本中的符号仅代表一个地址，而普通符号不仅代表一个地址，还有该地址的内存空间。
 
 关于`initrd`内核启动项参数可能会带来一些困惑，先查看内核文档中的介绍：
 ```
@@ -300,7 +371,7 @@ x86 64bit boot protocol规定，bootloader加载内核会初始化清零`boot pa
 arm64平台通过FDT(flatten device tree)中的`chosen`节点设置内核启动项参数(`bootargs`)以及initramfs(`initrd-start`、`initrd-end`)[1]。
 
 ### Compatible with initrd
-initramfs解压完成之后，检查rootfs中是否存在完成内核空间到用户空间切换的init程序。内核中使`ramdisk_execute_command`变量指定init程序路径，默认是`/init`，也可以通过`rdinit=<full_path>`内核启动项参数指定程序路径。
+initramfs解压完成之后，检查rootfs中是否存在early userspace startup init程序。内核变量`ramdisk_execute_command`指定init程序路径，默认是`/init`，也可以通过`rdinit=<full_path>`内核启动项参数指定程序路径。
 若rootfs中不存在init程序，则认为指定的是initrd，而非initramfs。之前通过解压initramfs的方式解压initrd不成功，则当前rootfs中自然不存在init程序，见`do_populate_rootfs`中的流程3。需要调用`prepare_namespace`通过initrd完成实际根文件系统的挂载。
 ```c
 void __init prepare_namespace(void)
@@ -438,9 +509,10 @@ bool __init initrd_load(void)
 * -1, initd中的magic number有误
 * 0，initrd被压缩，随后调用`crd_load(decompressor)`解压initrd到/dev/ram
 * nblocks(> 0)，initrd未被压缩，nblocks表示initrd的大小，以block(1024byte)为单位表示，随后直接从`/initrd.image`读入到/dev/ram
+
 initrd可以是minix、ext2、romfs、cramfs、squashfs文件系统。压缩算法支持gzip、bzip2、lzma、xz、lzo、lz4。
 
-`handle_initrd`首先将载有initrd的ramdisk挂载到rootfs的`/root`目录，随后执行用户态程序/root/linuxrc加载挂载最终根文件系统所需的驱动模块。内核文档`Documentation/driver-api/early-userspace/early_userspace_support.rst`说明了`linuxrc`程序的作用:
+`handle_initrd`首先将载有initrd的ramdisk挂载到rootfs的`/root`目录，随后执行用户态程序/root/linuxrc加载最终根文件系统所需的驱动模块。内核文档`Documentation/driver-api/early-userspace/early_userspace_support.rst`说明了`linuxrc`程序的作用:
 > some device and filesystem drivers built as modules and stored in an initrd.  The initrd must contain a binary '/linuxrc' which is supposed to load these driver modules.  It is also possible to mount the final root filesystem via linuxrc and use the pivot_root syscall.  The initrd is mounted and executed via prepare_namespace().
 
 最后调用`mount_root`挂载实际根文件系统，上述步骤完成之后，rootfs中的目录结构如下:
@@ -489,10 +561,10 @@ static int __init do_mount_root(const char *name, const char *fs,
 ## Summary and example
 内核启动过程的initramfs阶段兼容了initrd启动方式，流程总结如下:
 1. 挂载rootfs
-2. 创建1号进程kernel_init，启动过程的initramfs阶段由1号进程完成
+2. 创建1号进程kernel_init，启动过程的initramfs阶段的初始化工作由1号进程完成
 3. 执行内核初始化函数populate_rootfs，解压initramfs至rootfs
-4. 若步骤3中，系统为配置initramfs，则认为使用的是legacy initrd，调用prepare_namespace通过initrd完成实际根文件系统的挂载
-5. 调用rootfs中的init程序完成后续初始化工作，并切换到用户空间，成为实际根文件系统的1号进程。initrd过渡的方式由于已经挂载了实际根文件系统，此时执行的是实际根文件系统的init程序。而initramfs过渡的方式，执行的是initramfs中的init程序，还需要完成挂载实际根文件系统的责任。
+4. 若步骤3未配置initramfs，则认为使用的是legacy initrd，调用prepare_namespace通过initrd完成实际根文件系统的挂载
+5. 调用rootfs中的init程序完成后续初始化工作，并切换到用户空间，成为实际根文件系统的1号进程。由于initrd的过渡方式已经挂载实际根文件系统，此时执行的是实际根文件系统的init程序。而initramfs的过渡方式，执行的是initramfs中的init程序，还需要完成挂载实际根文件系统的工作。
 
 {% asset_img initramfs.png %}
 
@@ -505,7 +577,7 @@ init -> usr/lib/systemd/systemd
 ./usr/lib/systemd/system/default.target -> initrd.target
 sysroot/
 
-ll /usr/lib/systemd/system/default.target
+$ ll /usr/lib/systemd/system/default.target
 /usr/lib/systemd/system/default.target -> graphical.target
 ```
 
@@ -513,9 +585,9 @@ ll /usr/lib/systemd/system/default.target
 1. 实际根文件系统尚未挂载，相关的systemd程序以及target源于initramfs
    1.1. sysinit.target: 读系统环境做初始化
    1.2. basic.target: 完成早期开机自启动的初始化工作
-   1.3. default.target是一个软链接，指向initrd.target，为后续切换到实际根文件系统做初始化准备，如检查并挂载
+   1.3. default.target是一个软链接，指向initrd.target，为后续切换到实际根文件系统做初始化准备
    1.4 将实际根文件系统挂载到/sysroot目录，将/sysroot目录挂载到当前的根目录，实际根文件系统完成挂载。exec实际根文件系统中的systemd，完成到用户空间进程的切换
-2. 实际根文件系统挂载后，执行的systemd及target源于根文件系统。同样会经历sysinit.target、basic.target阶段，不论是initramfs，还是根文件系统，这两个阶段都是为default.target阶段做准备。default.target也是个软链接决定相应的“运行级别”，当前系统指向graphical.target表示进入的是图形终端。也可以指向multi-user.target进入无图形化终端[4]。
+2. 实际根文件系统挂载后，执行的systemd及target源于根文件系统。同样会经历sysinit.target、basic.target阶段，不论是initramfs，还是根文件系统，这两个阶段都是为default.target阶段做准备。default.target也是个软链接,决定相应的“运行级别”，当前系统指向graphical.target表示进入的是图形终端。也可以指向multi-user.target进入无图形化终端[4]。
 {% asset_img systemd.png %}
 
 > 以 ".target" 为后缀的单元文件， 封装了一个由 systemd 管理的启动目标， 用于在启动过程中将一组单元汇聚到一个众所周知的同步点。
