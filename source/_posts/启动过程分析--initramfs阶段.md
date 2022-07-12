@@ -1,7 +1,7 @@
 ---
 title: 启动过程分析--initramfs阶段
 date: 2022-06-23T12:16:09+08:00
-tags: boot initramfs
+tags: [boot, initramfs]
 categories: boot
 ---
 
