@@ -2,9 +2,7 @@
 title: 【译文】 Becoming friends with NetworkManager
 date: 2020-12-30T21:06:21+08:00
 tags: [RedHat, NetworkManager, Network]
-categories:
-  - translation
-  - Linux tools
+categories: [translation, tools]
 ---
 
 网上很多CentOS7网络配置的教程往往都会建议关闭Networkmanager使用network.service的方式进行网络配置：1. 配置`/etc/sysconfig/network-scripts/ifcfg-<net device>.cfg`；2. `systemctl restart network`重启网络生效。 3. 建议关闭NetworkManger，防止和network.service冲突。

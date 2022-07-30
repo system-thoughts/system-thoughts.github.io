@@ -2,9 +2,7 @@
 title: 【译文】Memory Ordering at Compile Time
 date: 2021-03-22T19:21:52+08:00
 tags: [lock-free, memory-reordering]
-categories:
-    - translation
-    - lock-free
+categories: [translation, lock-free]
 ---
 
 我们编写的C/C++代码在处理器上实际的执行顺序和其在源码中的顺序可能并不相同。编译器会通过指令重排优化编译效果，CPU也会通过乱序执行优化执行效率。本文将介绍编译时的内存重排。

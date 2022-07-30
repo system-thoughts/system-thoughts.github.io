@@ -2,8 +2,7 @@
 title: Understanding gzip - LZ77
 date: 2022-03-02T19:34:59+08:00
 tags: [gzip, deflate]
-categories: 
-    - "Base Service"
+categories: "Base Service"
 ---
 
 gzip是一种压缩格式也是类Unix上的文件压缩/解压缩软件，通常指GNU计划的实现，此处gzip代表GNU zip。gzip文件格式在[RFC 1952  GZIP file format specification version 4.3](https://datatracker.ietf.org/doc/html/rfc1952)中标准化，gzip基于DEFLATE算法实现数据压缩，DEFLATE算法在[RFC 1951 DEFLATE Compressed Data Format Specification version 1.3](https://datatracker.ietf.org/doc/html/rfc1951)中标准化。

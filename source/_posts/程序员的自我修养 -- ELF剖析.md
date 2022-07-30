@@ -160,6 +160,8 @@ String dump of section '.shstrtab':
 | +0 | \0 | . | s | y | m | t | a | b | \0 | . |
 | +10 | s | t | r | t | a | b | \0 | . | s | h |
 
+`readelf -p .shstrtab simpleElf.o`显示的`.shstrtab`段的内容中包含10个段的名字，少了两个段`.text`和`.eh_frame`，是不是工具的问题呢？并不是，这两个段的名称复用了".rela.text"、".rela.eh_frame"字符串，`.text`和`.eh_frame`的section header的`sh_name`字段指向的是上述段名中间的"."的偏移🙃
+
 ## section header table
 ELF header中有三个字段与section header table相关：
 * `e_shoff`：section header table在文件中的偏移(单位：byte)，如果不存在section header table，则为0

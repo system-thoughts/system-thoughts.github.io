@@ -1,7 +1,7 @@
 ---
 title: 开机过程分析--BIOS阶段
 date: 2021-12-09T21:27:09+08:00
-tags: boot BIOS
+tags: [boot, BIOS]
 categories: boot
 ---
 
