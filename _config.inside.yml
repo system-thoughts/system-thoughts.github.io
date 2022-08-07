@@ -293,8 +293,8 @@ copyright:
 # Built-in support Disqus (https://disqus.com) and LiveRe (https://livere.com),
 # for other comment system, see plugins
 comments:
-  disqus:
-    shortname: system-thoughts
+  # disqus:
+  #  shortname: system-thoughts
   #   # Or you can set disqus script URL directly
   #   script: //disqus_shortname.disqus.com/embed.js
   #   # Autoload, default to `true`, set to `false` to display a button
@@ -472,3 +472,22 @@ plugins:
       <div class="social-share" data-disabled="qzone,qq,diandian,tencent"></div>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/css/share.min.css">
       <script src="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/js/social-share.min.js"></script>
+
+  - position: post
+    template: |
+      <div id="gscomment"></div>
+      <script src="https://giscus.app/client.js"
+        data-repo="system-thoughts/system-thoughts.github.io"
+        data-repo-id="MDEwOlJlcG9zaXRvcnkzMTYyNjc2OTY="
+        data-category="General"
+        data-category-id="DIC_kwDOEtncsM4CQq0r"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="light"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+      </script>
