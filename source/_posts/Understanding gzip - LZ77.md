@@ -13,7 +13,7 @@ DEFLATE算法基于LZ77算法和Huffman编码实现流数据压缩。LZ77算法�
 LZ77算法利用文本中字符串具有重复的特点，将后续重复出现的字符串使用`<length, distance>`二元组表示，`length`表示匹配字符串的长度，`distance`表示到之前出现的相同字符串的距离。文本中的重复字符串越多、重复字符串长度越长，LZ77算法则会取得更好的压缩效果。
 如下图所示，LZ77算法基于滑动窗口实现。滑动窗口包含两部分：前半部分是已经编码的字符流，称为字典或者search buffer；后半部分是待编码的字符流，称为look-ahead buffer。LZ77算法编码look-ahead buffer中的字符时，会在search buffer中寻找最长匹配字符串，若无匹配则直接输出字符(`literal`)，若存在匹配字符串，则将匹配字符串通过`<length, distance>`编码。DEFLATE算法规定匹配字符串的长度范围是[3, 258]。这个范围是压缩率和算法的时间复杂度之间的平衡。
 
-{% asset_img lz77.png %}
+![](lz77.png)
 
 由图可知，LZ77编码的字符流仅包含三种类型的数据：`literal`、`length`、`distance`。实际上，look-ahead buffer长度小于`MIN_LOOKAHEAD`时，滑动窗口便会向前移动以填充后续数据流从而扩大look-ahead buffer。上图所示look-ahead buffer被匹配完的情况只有在滑动窗口到达字节流末尾，无法向前滑动时出现。`fill_window`函数表示滑动窗口的实现：
 
@@ -200,7 +200,7 @@ for (j=0; j<MIN_MATCH-1; j++) UPDATE_HASH(ins_h, window[j])
     prev[(s) & WMASK] = match_head = head[ins_h], \
     head[ins_h] = (s))
 ```
-{% asset_img hash.png %}
+![](hash.png)
 当前字符开始长度为3的字符串的hash key可以通过之前的hash key与当前的字符进行异或运算，在O(1)时间内求得。因此，整个字符流的所有长度为3的字符串的hash key的计算时间复杂度为O(n)。
 
 整个链式hash表的实现也很简单：

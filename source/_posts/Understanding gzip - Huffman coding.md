@@ -10,11 +10,11 @@ DEFLATE算法首先通过[LZ77算法](https://system-thoughts.github.io/base-ser
 ## alphabet
 `literal`和`length`使用一张285个编码(codes)的字符表。(0..255)是`literal`的编码，直接使用ASCII编码。`length`的取值范围是(3..258)，使用(257..285)编码区间，字符`256`代表`end-of-block`，DEFLATE算法的压缩数据以block形式组织，`end-of-block`是block的结束标识。
 `literal`这种一一对应的编码很好理解，`length`的取值范围明显大于编码范围，详细看看DEFLATE算法如何编码`length`：
-{% asset_img length_alphabet.png %}
+![](length_alphabet.png)
 DEFLATE将`length`的取值从(3..258)编码到(257..285)的编码范围，因此，一些`length`会共用同一编码。紧随编码之后的`Extra bits`解决了同一编码共享的问题。以`length`的取值11、12为例，它们共享同一编码265，如果编码265在计算机中以3-bit的二进制编码`110B`存储，则`length` 11的二进制编码是`1100B`,`length` 12的二进制编码是`1101B`。`literal & length`字符表中，`length`越长，`Extra bits`越长；同时也意味着字符串匹配的长度越长，出现的概率越小。可见，DEFLATE算法在字符长度和计算复杂度之间做了trade off的。不过，`285`这个字符`Extra bits`长度为0，可能因为`285`作为DEFLATE算法规定的最大匹配长度，出现的概率也会更高。
 
 `distance`的字符表如下所示，不再过多解释：
-{% asset_img distance_alphabet.png %}
+![](distance_alphabet.png)
 
 ## Huffman coding
 字符表中的编码有两种二进制编码方式：定长(fixed-length)编码、变长(variable-length)编码。
@@ -25,7 +25,7 @@ DEFLATE算法将根据字符在LZ77编码字符流中出现的实际频次而构
 
 ### fixed Huffman codes
 `fixed Huffman codes`编码模式下，`literal/length`字符表、`distance`字符表的Huffman编码都是固定的，下图是`literal & length`字符表的Huffman编码：
-{% asset_img fixed_huffman_codes.png %}
+![](fixed_huffman_codes.png)
 `distance`字符表(0..29)使用固定长度的5-bit编码(编码范围：0-31)。
 到这，您可能会问`fixed Huffman codes`存在的意义？它并不是根据字符出现的实际频次而产生的Huffman编码，肯定不适用于任何输入数据集。
 前面我们提到`dynamic Huffman code`还需要将两张字符表对应的Huffman编码信息加入到压缩数据流以支持后续的解压操作。那么，待压缩的数据量较小时，`dynamic Huffman codes`编码会额外存储的这些metadata，从而比直接使用`fixed Huffman codes`的编码长度更长。
@@ -194,7 +194,7 @@ local void gen_bitlen(desc)
 ```
 `gen_bitlen`函数最后的`do-while`循环和`for`循环完成超长节点的调整，其实现主要是调整`bl_count`数组和调整节点`m`的实际编码长度`tree[m].Len`。可见，`build_tree`最初生成的Huffman树确实是一棵“编码不明”的Huffman树，即无需确定叶子节点的具体位置（无法确定是左/右子节点），只要该节点的编码长度正确即可。
 下图展示了超长节点的调整过程：
-{% asset_img adjust.png %}
+![](adjust.png)
 
 * 字符表中字符出现的频率是(2, 3, 3, 4, 5, 7, 10)，为简化描述，后面用频次代指相应的编码
 * `build_tree`构建Huffman树后，节点的父子关系确定，各个节点的编码长度确定。假设当前的`MAX_BITS=4`，则叶子节点3、2超出了最大编码长度
@@ -742,7 +742,7 @@ local void compress_block(ltree, dtree)
 }
 ```
 以LZ77压缩的字符流`a(3,4)cd(4,7)bef`为例，相应的数值(字符使用ASCII编码表示)是`97,3,4,99,100,4,7,98,101,102`。实际存储在`flag_buf`和`d_buf`中的数据(见`ct_tally`的调用点)是`97,3-3,4,99,100,4-3,7,98,101,102`即`97,0,4,99,100,1,7,98,101,102`。下图展示了字符流在`l_buf`和`d_buf`中的存储：
-{% asset_img literal_length.png %}
+![](literal_length.png)
 `l_buf`存储了`literal`和`length - 3`，以字节为单位存储。为了区分`l_buf`中的`literal`和`length`，使用`flag_buf`中的`flag`bit位区分。`bit`位为0，代表`l_buf`相应位置存储的是`literal`，若为1，则存储的是`length`。因此每处理完`l_buf`中的1个字符，`flag`要向右移动一位；每处理完`l_buf`中的8个字符，需要读取`flag_buf`中的下一个`flag`。
 
 3.4 `init_block`为新的block做初始化工作：
@@ -767,7 +767,7 @@ local void init_block()
 
 ## Summary
 DEFLATE算法的Huffman编码的压缩过程可以用下图表示：
-{% asset_img Huffman_encoding.png %}
+![](Huffman_encoding.png)
 
 1. 统计LZ77算法压缩数据流中`literal`、`length`出现的频次，构建`literal & length`字符表的Huffman树，并以RLE表示；同样得到`distance`字符表的Huffman编码的RLE表示
 2. 统计`literal & length`字符表、`distance`字符表Huffman编码的RLE表示中RLE字符出现的频次，构建RLE字符表的Huffman树，得到RLE字符表Huffman编码的`code length sequence`表示

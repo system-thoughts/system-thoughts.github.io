@@ -78,7 +78,7 @@ entry_post:
 
 第一条指令便是跳转到1MB以下的`0xfe05b`处执行，如[下图](https://read.seas.harvard.edu/~kohler/class/08w-aos/lab1.html)所示，该地址处于BIOS ROM区域。BIOS ROM内存区域是BIOS shadow内存区域，当前该内存区域是BIOS在ROM/flash实际存储中的一份只读拷贝。由于CPU访问flash/ROM的速度/带宽要慢于CPU访问RAM的速度，BIOS shadow可以加快CPU访问BIOS程序的速度。
 
-{% asset_img physical_memory_map.PNG %}
+![](physical_memory_map.PNG)
 
 首先通过`HaveRunPost`全局变量判断是否经历过POST阶段，若经过POST阶段，则跳过POST阶段执行`resume`。否则切换到32bit保护模式执行`handle_post`函数进入POST阶段。
 
@@ -196,7 +196,7 @@ inb (0x71, (NMI_disable_bit << 7) | (selected CMOS register number));
 ```
 可见通过往A20 `0x92`I/O端口置位第2 bit位开启A20总线。
 随后通过`lidtw`和`lgdtw`两条命令加载`idtr`和`gdtr`寄存器，设定中断描述符表和全局描述符表。32bit保护模式下的分段寻址和实模式有较大差异。偏移值同实模式一样，只不过变成了32bit。段值仍然放在以前的16bit寄存器，不过寄存器存放的不是段基址，而是段选择符。通过段选择符不仅能够索引全局/局部描述符表获取段描述符中的基址，还能够描述当前访问操作的特权级实现段保护。
-{% asset_img segment_selector.PNG %}
+![](segment_selector.PNG)
 
 段描述符表`rombios32_gdt_48`如代码所示，对比段描述符结构，则一目了然。
 ```c
@@ -234,7 +234,7 @@ struct descloc_s rombios32_gdt_48 VARFSEG = {
     .addr = (u32)rombios32_gdt,
 };
 ```
-{% asset_img segment_descriptor.PNG %}
+![](segment_descriptor.PNG)
 
 随后通过设置`CR0`寄存器：关闭分页模式、使能CPU cache、设置CPU cache Write-through、并开启保护模式：
 ```c
@@ -496,7 +496,7 @@ boot_disk(u8 bootdrv, int checksig)
 }
 ```
 `int 0x13H`从硬盘读取第一个扇区(MBR)至`ES:BX`,`BX`初始化为0，因此MBR的内容读取到`0x07c0:0x0`。 `int 0x13H`相关寄存器参数[3]:
-{% asset_img int13.PNG %}
+![](int13.PNG)
 `GET_FARVAR(bootseg, mbr->signature)`便是校验MBR签名`0xaa55`，确认读取到的内容就是MBR扇区。
 最后的规范化(Canonicalize)操作为了让后续调用bootloader时，段地址:偏移地址为`0x0:0x7c00`而非`0x07c0:0x0`。
 最后调用`call_boot_entry`跳转至`0x0:0x7c00`地址，转移至bootloader执行，此时系统仍处于16bit实模式。
@@ -525,7 +525,7 @@ _start:
 # gcc -Wl,--oformat=binary -Wl,-Ttext=0x7c00 -Wl,--build-id=none -nostartfiles -nostdlib -m32 -o boot.bin boot.S
 # qemu-kvm -nographic -drive format=raw,file=boot.bin
 ```
-{% asset_img mbr.PNG %}
+![](mbr.PNG)
 bootloader程序很简单，就是向屏幕输出`!`。
 
 ## Reference

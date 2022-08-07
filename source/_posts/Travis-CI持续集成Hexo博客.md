@@ -172,8 +172,8 @@ FATAL { err:
 
 如此看来,public目录中保存的是hexo g本地生成的静态站点页面。.deploy_git实际上就是代码仓，跟踪的就是`<username>.github.io`代码仓。当执行hexo d时，会将public目录中的内容形成一次新的提交记录，提交到`<username>.github.io`代码仓中。
 对比下.deploy_git与`<username>.github.io`下的历史记录，两者完全匹配：
-{% asset_img deploy_git_log.png %}
-{% asset_img github_history.png %}
+![](deploy_git_log.png)
+![](github_history.png)
 
 `.deploy_git`是`<uername>.github.io`的本地仓库，其master分支追踪`<uername>.github.io`的本地分支。
 在blog根目录中，在hexo init初始化时便存在.gitignore文件：
@@ -201,11 +201,11 @@ $ git push origin master:src
 
 ## Travis CI持续集成hexo blog
 本地部署和travis CI部署博客的工作流程区分如图所示：
-{% asset_img travis_ci.png %}
+![](travis_ci.png)
 Travis CI会自动部署hexo依赖的环境，一旦更新源文件，便会触发Travis CI构建、部署blog。具体步骤如下：
 1. 打开官方网站[https://travis-ci.com/](https://travis-ci.com/)，使用github账号进行登录，然后 Travis CI会列出你 Github上面所有的仓库，以及你所属于的组织。点击安装Travis CI github APP，随后选择Travis CI有权限访问账号下的所有代码仓。
-{% asset_img travis_org.png %}
-{% asset_img repository_access.png %}
+![](travis_org.png)
+![](repository_access.png)
 2. 若要Travis CI能够构建项目，需要在代码仓根目录中添加.travis.yml配置文件。当代码仓中有新的提交时，Travis CI会根据yaml文件的配置进行构建、发布。
 ```bash
 language: node_js
@@ -230,7 +230,7 @@ env:
 ```
 3. Travis CI将构建生成的静态页面部署到github page，需要推送代码到`<username>.github.io`代码仓的权限。Github提供了Personal Access Token赋予Travis CI权限。前往 Github 帐号 Settings 页面，在左侧选择Developer settings → Personal Access Token，然后在右侧面板点击 “Generate new token” 来新建一个 Token。需要注意的是，创建完的 Token 只有第一次可见，之后再访问就无法看见（只能看见他的名称），因此要保存好这个值。
 之前生成 Personal Access Token时，只选择了以下权限：
-{% asset_img token_permission.png %}
+![](token_permission.png)
 加密密钥：
 ```bash
 $ yum -y install ruby ruby-devel rubygems rpm-build
@@ -240,8 +240,8 @@ $ travis encrypt --pro 'GITHUB_TOKEN=<Personal Access Token>' --add
 ```
 这里要登录[https://api.travis-ci.com](https://api.travis-ci.com/) 而非使用`travis login  --github-token '<Personal Access Token>'`登录[https://api.travis-ci.org/](https://api.travis-ci.org/)。因为我们的工程在[https://api.travis-ci.com](https://api.travis-ci.com/) 上构建。后续使用travis encrypt加密的GITHUB_TOKEN环境变量应该在travis-ci.com中。travis encrpt中自行贴入`Personal Access Token`的明文。之后.travis.yml的内容会自动更新。
 密钥添加成功之后，每次触发travis-ci构建都能观察到该环境变量：
-{% asset_img token_env.png %}
-4. 对源文件进行修改之后，提交即可触发Travis CI构建，若要忽略某次提交，即这次提交不要触发Travis CI构建发布hexo blog，travis若要忽略一次提交，即这次提交不会触发Travis-CI构建，可以在commit msg中加入`[ci skip]`或者`[skip-ci]`关键字：
+![](token_env.png)
+1. 对源文件进行修改之后，提交即可触发Travis CI构建，若要忽略某次提交，即这次提交不要触发Travis CI构建发布hexo blog，travis若要忽略一次提交，即这次提交不会触发Travis-CI构建，可以在commit msg中加入`[ci skip]`或者`[skip-ci]`关键字：
 ```bash
 git commit -m 'documentation update [ci skip]'
 ```

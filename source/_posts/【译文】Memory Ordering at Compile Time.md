@@ -21,7 +21,7 @@ categories: [translation, lock-free]
 
 ## Compiler Instruction Reordering
 如您所知，编译器的工作是将人类可读的源代码转换为CPU可读的机器代码。在此转换过程中，编译器有很大的自由度。
-{% asset_img compiler-reordering.png %}
+![](compiler-reordering.png)
 编译器在保证单线程行为不变的情况下有指令重排的自由。指令重排通常在启用编译器优化时发生，考虑以下函数：
 ```c
 int A, B;

@@ -26,7 +26,7 @@ core-test_c-11-0-0-98197-1658125608: ELF 64-bit LSB core file, x86-64, version 1
 ```
 
 ELF文件格式有两种不同的视角：参与链接的`Linking view`；加载、运行ELF文件的`Execution view`。
-{% asset_img ELF_format.png %}
+![](ELF_format.png)
 
 ELF文件头部是`ELF header`，作为`road map`描述ELF文件组织。链接视角下，ELF文件中的信息按照`section`来组织；执行视角下，ELF文件中的信息按照`segment`来组织。一般来说，将`section`翻译成“节”，将`segment`翻译成“段”，但是在处理ELF文件过程中，往往将二者都翻译成“段”，可以根据实际的视角上下文，便能区分出“段”指的是`section`还是`segment`。不论`section`还是`segment`，都是ELF将相同属性的数据组织到一起的方式。
 
@@ -123,7 +123,7 @@ ELF Header:
   Section header string table index: 12
   ```
 ELF格式可以支持32bit/64bit处理器，也支持不同字节序(大端/小端)处理器。ELF header开头的`ELF Identification`(`e_ident`)字段指定了底层硬件信息：
-{% asset_img e_ident.png %}
+![](e_ident.png)
 最开始的4字节是ELF文件的标识码，也叫做`magic number`，分别是0x7f、0x45、0x4c、0x46，第一个字节对应的是ASCII字符集中的`DEL`控制符，其余三个字节刚好是ELF这三个字母的ASCII编码。
 
 字节`e_ident[EI_CLASS]`表示`file class`，区分ELF文件是64bit还是32bit。1表示32bit，2表示64bit。
@@ -132,7 +132,7 @@ ELF格式可以支持32bit/64bit处理器，也支持不同字节序(大端/小�
 字节`e_ident[EI_VERSION]`、`e_ident[EI_VERSION]`表示OS/ABI ELF扩展，0表示未定义，看来默认遵循Unix System V ABI标准。
 
 接下来的`e_type`字段区分ELF文件类型：
-{% asset_img e_type.png %}
+![](e_type.png)
 
 `e_machine`字段指定了ELF文件的平台架构属性，该字段的详细取值范围参考[1]，`EM_X86_64`表示x86_64平台、`EM_AARCH64`表示ARM64平台。
 `e_entry`字段指定的是系统加载ELF文件后，系统跳转执行的第一条命令，可以理解为程序的入口。可重定位文件不会被加载执行，所以此处为0。
@@ -276,7 +276,7 @@ GNU ld当前仅支持`SHF_MERGE|SHF_STRINGS`都设置的段的合并。
 
 ### sh_link and sh_info
 `sh_link`与`sh_info`存储的内容取决于section类型：
-{% asset_img sh_link.png %}
+![](sh_link.png)
 
 由上表可见，`sh_link`和`sh_info`存储的都是section header index，只是根据section类型，存储的是不同的section的索引。对于，不在上表的section type，其`sh_link`和`sh_info`字段为`SHN_UNDEF`(0)。
 

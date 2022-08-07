@@ -24,6 +24,7 @@
     "hexo-server": "^2.0.0",
     "markdown-it": "^12.0.2",
     "markdown-it-container": "^3.0.0",
-    "hexo-abbrlink": "^2.0.5"
+    "hexo-abbrlink": "^2.0.5",
+    "hexo-asset-image": "git+https://gitee.com/hamawang/hexo-asset-image.git"
   }
 }

@@ -566,7 +566,7 @@ static int __init do_mount_root(const char *name, const char *fs,
 4. 若步骤3未配置initramfs，则认为使用的是legacy initrd，调用prepare_namespace通过initrd完成实际根文件系统的挂载
 5. 调用rootfs中的init程序完成后续初始化工作，并切换到用户空间，成为实际根文件系统的1号进程。由于initrd的过渡方式已经挂载实际根文件系统，此时执行的是实际根文件系统的init程序。而initramfs的过渡方式，执行的是initramfs中的init程序，还需要完成挂载实际根文件系统的工作。
 
-{% asset_img initramfs.png %}
+![](initramfs.png)
 
 解压CentOS8的initramfs，发现initramfs的init程序是systemd程序的软连接：
 ```bash
@@ -588,7 +588,7 @@ $ ll /usr/lib/systemd/system/default.target
    1.3. default.target是一个软链接，指向initrd.target，为后续切换到实际根文件系统做初始化准备
    1.4 将实际根文件系统挂载到/sysroot目录，将/sysroot目录挂载到当前的根目录，实际根文件系统完成挂载。exec实际根文件系统中的systemd，完成到用户空间进程的切换
 2. 实际根文件系统挂载后，执行的systemd及target源于根文件系统。同样会经历sysinit.target、basic.target阶段，不论是initramfs，还是根文件系统，这两个阶段都是为default.target阶段做准备。default.target也是个软链接,决定相应的“运行级别”，当前系统指向graphical.target表示进入的是图形终端。也可以指向multi-user.target进入无图形化终端[4]。
-{% asset_img systemd.png %}
+![](systemd.png)
 
 > 以 ".target" 为后缀的单元文件， 封装了一个由 systemd 管理的启动目标， 用于在启动过程中将一组单元汇聚到一个众所周知的同步点。
 
