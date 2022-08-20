@@ -79,6 +79,7 @@ MUA使用POP3/IMAP协议从邮件服务器下载邮件。两者的区别如下[3
 上图展示了两台电脑都从同一email账号下载邮件（均使用POP3协议），两台电脑上的目录结构截然不同，因为POP3不会同步两台电脑中的目录。当有新邮件到来时，第一台电脑先下载了邮件，邮件便会从邮件服务器中删除，第二胎电脑是获取不到新邮件的。不过后面这个问题还好，很多邮件客户端可以设置`leave a copy of messages on the server`。
 
 POP3和IMAP的比较，如下表所示：
+
 | metrics |  POP3  | IMAP |
 | -- | -- | -- |
 | view without Internet | Yes | NO |
@@ -149,7 +150,7 @@ set smtp_pass = $imap_pass
 Could not connect to smtp.gmail.com (Connection refused).
 Could not send the message.
 ```
-邮件发送失败。使用`mutt -d`选项输出调试信息，调试级别从1~5，日志详细级别相应提高。调试信息输出到`~/.muttdebug*`。上面的发送失败很可能是因为网络不稳定。gmail smtp使用更为安全的TLS协议，端口为[587](https://support.google.com/mail/answer/7126229?visit_id=636857391298706033-411564613&rd=2#cantsignin&zippy=%2Csecurity-certificate-cn-error%2Cmy-email-client-is-crashing-or-emails-are-taking-too-long-to-download)。[ssl_ca_certificates_file](http://www.mutt.org/doc/manual/#ssl_ca_certificates_file)指定的文件包含了所有受信任的CA证书。使用这些CA证书之一签名的任何服务器证书也会被自动接受(仅GnuTLS)。使用`mutt -D`查看默认配置：
+邮件发送失败。使用`mutt -d`选项输出调试信息，调试级别从1~5，日志详细级别相应提高。调试信息输出到'~/.muttdebug*'。上面的发送失败很可能是因为网络不稳定。gmail smtp使用更为安全的TLS协议，端口为[587](https://support.google.com/mail/answer/7126229?visit_id=636857391298706033-411564613&rd=2#cantsignin&zippy=%2Csecurity-certificate-cn-error%2Cmy-email-client-is-crashing-or-emails-are-taking-too-long-to-download)。[ssl_ca_certificates_file](http://www.mutt.org/doc/manual/#ssl_ca_certificates_file)指定的文件包含了所有受信任的CA证书。使用这些CA证书之一签名的任何服务器证书也会被自动接受(仅GnuTLS)。使用`mutt -D`查看默认配置：
 ```bash
 [root@localhost ~]# mutt -D | grep ssl_ca_certificates_file
 ssl_ca_certificates_file="/etc/ssl/certs/ca-bundle.crt"

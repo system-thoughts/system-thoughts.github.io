@@ -81,30 +81,37 @@ scroll_smooth: true
 ############################### Navigation Bar ############################### > start
 # 注意事项：建议规范全站路径 URL 最后带一个 "/" 例如 "about/"
 navbar:
-  visiable: auto # always, auto
+  visiable: always
   logo: # choose [img] or [icon + title]
-    img: volantis-static/media/org.volantis/blog/Logo-NavBar@3x.png # https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/Logo-NavBar@3x.png
+    img: /images/linux_icon.png
     icon:
     title:
   menu:
-    - name: 博客
-      icon: fa-solid fa-rss
+    - name: Blog
+      icon: fa-solid fa-blog
       url: /
-    - name: 分类
-      icon: fa-solid fa-folder-open
-      url: categories/
-    - name: 标签
-      icon: fa-solid fa-tags
-      url: tags/
-    - name: 归档
-      icon: fa-solid fa-archive
-      url: archives/
-    - name: 友链
-      icon: fa-solid fa-link
-      url: friends/
-    - name: 关于
+      rows:
+        - name: Archive
+          icon: fa-solid fa-archive
+          url: archives/
+        - name: Changelog
+          icon: fa-solid fa-code-commit
+          url: changelog/
+        - name: Translation
+          icon: fa-solid fa-language
+          url: traslation/
+    - name: Presentation
+      icon: fa-brands fa-slideshare
+      url: slide_talk/    
+    - name: Patches
+      icon: fa-solid fa-code-pull-request
+      url: contribution/
+    - name: About
       icon: fa-solid fa-info-circle
       url: about/
+    - name: Darkmode
+      icon: fas fa-moon
+      toggle: darkmode
   search: Search...   # Search bar placeholder
 ############################### Navigation Bar ############################### > end
 
@@ -112,15 +119,14 @@ navbar:
 ############################### Cover ############################### > start
 cover:
   height_scheme: full # full, half
-  layout_scheme: dock # blank (留白), search (搜索), dock (坞), featured (精选), focus (焦点)
+  layout_scheme: blank # blank (留白), search (搜索), dock (坞), featured (精选), focus (焦点)
   display:
-    home: true
-    archive: true
+    home: false
+    archive: false
     others: false # can be written in front-matter 'cover: true'
-  background: https://gcore.jsdelivr.net/gh/MHG-LAB/cron@gh-pages/bing/bing.jpg
-  # background: https://bing.ioliu.cn/v1/rand?w=1920&h=1200
+  background: #https://gcore.jsdelivr.net/gh/MHG-LAB/cron@gh-pages/bing/bing.jpg
   logo: # https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/Logo-Cover@3x.png
-  title: 'Volantis'
+  title: ''
   subtitle: ''
   search: A Wonderful Theme for Hexo # search bar placeholder
   features:
@@ -170,7 +176,7 @@ article:
     # hide excerpt
     hide_excerpt: false
     # show split line or not
-    line_style: solid # hidden, solid, dashed, dotted
+    line_style: dashed # hidden, solid, dashed, dotted
     # show author
     author: false # true, false
     # show readmore button
@@ -189,7 +195,7 @@ article:
       # ----------------
       # 参考资料、相关资料等 (for layout: post/docs)
       references:
-        title: 参考资料
+        title: References
         icon: fa-solid fa-quote-left
         # 在 front-matter 中:
         #   references:
@@ -200,8 +206,8 @@ article:
       # 相关文章，需要安装插件 (for layout: post)
       # npm i hexo-related-popular-posts
       related_posts:
-        enable: false
-        title: 相关文章
+        enable: true
+        title: Related posts
         icon: fa-solid fa-bookmark
         max_count: 5
         # 设为空则不使用文章头图
@@ -209,10 +215,10 @@ article:
       # ----------------
       # 版权声明组件 (for layout: post)
       copyright:
-        enable: false
-        permalink: '本文永久链接是：'
+        enable: true
+        permalink: 'Permalink:'
         content:
-          - '博客内容遵循 署名-非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0) 协议'
+          - 'The post follows the Attribution-NonCommercial-ShareAlike 4.0 International (<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh#" target="_blank">CC BY-NC-SA 4.0</a>) License'
           - permalink
          # 自定义版权组件：精细到文章的版权声明
         custom: false # 开启后替代上方内容的版权显示
@@ -260,18 +266,18 @@ article:
       # 默认文章作者（可在 _data/author.yaml 中增加其他作者，并在 front-matter 中设置）
       # https://volantis.js.org/advanced-settings/#多人协同
       author:
-        avatar: volantis-static/media/org.volantis/blog/favicon/apple-touch-icon.png # https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/favicon/apple-touch-icon.png
-        name: 请设置文章作者
+        avatar: /images/avatar.png
+        name: Lv Ying
         url: /
       # 文章创建日期
       date:
         icon: fa-solid fa-calendar-alt
-        title: '发布于：'
+        title: 'publish date:'
         format: 'll' # 日期格式 http://momentjs.com/docs/
       # 文章更新日期
       updated:
         icon: fa-solid fa-edit
-        title: '更新于：'
+        title: 'updated:'
         format: 'll' # 日期格式 http://momentjs.com/docs/
       # 文章分类
       category:
@@ -279,15 +285,15 @@ article:
       # 文章浏览计数
       counter:
         icon: fa-solid fa-eye
-        unit: '次浏览'
+        unit: #'次浏览'
       # waline 文章评论数量
       walinecount:
         icon: fa-solid fa-comment-dots
-        desc: '条评论' # 条评论
+        desc: #'条评论' # 条评论
       # artalk 文章评论数量
       artalkcount:
         icon: fa-solid fa-comment-dots
-        desc: '条评论' # 条评论
+        desc: #'条评论' # 条评论
       # 文章字数和阅读时长
       wordcount:
         icon_wordcount: fa-solid fa-keyboard
@@ -297,22 +303,14 @@ article:
         icon: fa-solid fa-hashtag
       # 分享
       share:
-        - id: qq
-          img:  volantis-static/media/org.volantis/logo/128/qq.png #  https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png
-        - id: qzone
-          img: volantis-static/media/org.volantis/logo/128/qzone.png #  https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png
-        - id: weibo
-          img: volantis-static/media/org.volantis/logo/128/weibo.png #  https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png
-        - id: # qrcode # 当id为qrcode时需要安装插件  npm i hexo-helper-qrcode
-          img: # volantis-static/media/org.volantis/logo/128/wechat.png #  https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/wechat.png
-        - id: # telegram
-          img: # volantis-static/media/org.volantis/logo/128/telegram.png #  https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/telegram.png
+        - id: qrcode # 当id为qrcode时需要安装插件  npm i hexo-helper-qrcode
+          img: https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/wechat.png
 ############################### Article Layout ############################### > end
 
 
 ############################### Comments ############################### > start
 comments:
-  title: <i class='fa-solid fa-comments'></i> 评论
+  title: <i class='fa-solid fa-comments'></i> Comments
   subtitle:
   service: giscus
   # 可选评论系统 #
@@ -345,14 +343,14 @@ comments:
   # https://github.com/laymonage/giscus
   giscus:
     # 以下配置按照 yml 格式增删填写即可
-    # repo: xxx/xxx
-    # repo-id: xxx
-    # category: xxx
-    # category-id: xxx
-    # mapping: "pathname"
-    # reactions-enabled: "1"
-    # emit-metadata: "0"
-    # lang: "zh-CN"
+    repo: system-thoughts/system-thoughts.github.io
+    repo-id: MDEwOlJlcG9zaXRvcnkzMTYyNjc2OTY=
+    category: Announcements
+    category-id: DIC_kwDOEtncsM4CQq0q
+    mapping: url
+    reactions-enabled: "1"
+    emit-metadata: "0"
+    lang: "zh-CN"
     # 以上配置按照 yml 格式增删填写即可
     theme:
       light: "light" # https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@master/css/giscus/light.css
@@ -490,7 +488,7 @@ comments:
 sidebar:
   position: right # left right
   # 主页、分类、归档等独立页面
-  for_page: [blogger, category, tagcloud, donate]
+  for_page: [blogger, follow, category, tagcloud]
   # layout: docs/post 这类文章页面
   for_post: [toc]
   # 侧边栏组件库
@@ -500,21 +498,13 @@ sidebar:
     blogger:
       class: blogger
       display: [desktop, mobile] # [desktop, mobile]
-      avatar: volantis-static/media/org.volantis/blog/Logo-NavBar@3x.png # https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/blog/Logo-NavBar@3x.png
+      avatar: /images/avatar.png
       shape: rectangle # circle, rectangle
       url: /about/
-      title:
+      title: Just Hack Fun
       subtitle:
       jinrishici: true # Poetry Today. You can set a string, and it will be displayed when loading fails.
-      social:
-        - icon: fa-solid fa-rss
-          url: /atom.xml
-        - icon: fa-solid fa-envelope
-          url: mailto:me@xxx.com
-        - icon: fab fa-github
-          url: https://github.com/volantis-x/
-        - icon: fa-solid fa-headphones-alt
-          url: /
+      social: false
     # ---------------------------------------
     # toc widget (valid only in articles)
     toc:
@@ -534,14 +524,24 @@ sidebar:
       display: [desktop, mobile] # [desktop, mobile]
       pjaxReload: false
     # ---------------------------------------
+    follow:
+      class: text
+      display: [desktop, mobile]
+      header:
+        icon: fa-solid fa-star
+        title: Follow
+      content:
+        - '<span> <script async defer src="https://buttons.github.io/buttons.js"></script> <a class="github-button" href="https://github.com/system-thoughts" data-show-count="true" aria-label="Follow @system-thoughts on GitHub">Follow @system-thoughts</a></span>'
+        - '<a href="#" class="button icon favorite">Push this blog</a>'  
+    # ---------------------------------------
     # category widget
     category:
       class: category
       display: [desktop] # [desktop, mobile]
       header:
         icon: fa-solid fa-folder-open
-        title: 文章分类
-        url: /blog/categories/
+        title: Categories
+        url: #/blog/categories/
     # ---------------------------------------
     # tagcloud widget
     tagcloud:
@@ -549,8 +549,8 @@ sidebar:
       display: [desktop, mobile] # [desktop, mobile]
       header:
         icon: fa-solid fa-tags
-        title: 热门标签
-        url: /blog/tags/
+        title: tags
+        url: #/blog/tags/
       min_font: 14
       max_font: 24
       color: true
@@ -633,26 +633,24 @@ tag_plugins:
 ############################### Site Footer ############################### > start
 site_footer:
   # layout of footer: [aplayer, social, license, info, copyright]
-  layout: [aplayer, social, license, analytics, info, copyright]
+  layout: [aplayer, social, badges]
   social:
-    - icon: #fa-solid fa-rss
-      url:
-    # or
-    - img:
-      url:
-    # or
-    - avatar:
-      url:
+    - icon: fa-solid fa-envelope
+      url: mailto:lvying.system.thoughts@gmail.com
+    - icon: fa-brands fa-github
+      url: https://github.com/system-thoughts
   # site source
   source: https://github.com/volantis-x/volantis-docs/
   # analytics using leancloud
   analytics: >
     <span id="lc-sv">本站总访问量为 <span id='number'><i class="fa-solid fa-loader fa-spin fa-fw" aria-hidden="true"></i></span> 次</span>
     <span id="lc-uv">访客数为 <span id='number'><i class="fa-solid fa-loader fa-spin fa-fw" aria-hidden="true"></i></span> 人</span>
-  # site copyright
-  copyright: '[Copyright © since 2017 XXX](/)'
-  # You can add your own property here. (Support markdown, for example: br: '<br>')
   br: '<br>'
+  badges: >
+    <object data="https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-brightgreen?logo=creativecommons&link=https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en"></object>
+    <object data="https://img.shields.io/badge/Frame-Hexo-green?logo=hexo&link=https://hexo.io/zh-cn/"></object>
+    <object data="https://img.shields.io/badge/Theme-Volantis-blue?link=https://github.com/volantis-x/hexo-theme-volantis/"></object>
+
 ############################### Site Footer ############################### > end
 
 ############################### Plugins ############################### > start
@@ -836,10 +834,10 @@ plugins:
   # 暗黑模式 darkmode
   # 开关按钮：在 navbar.menu 中添加：
   # - name: 暗黑模式 # 可自定义
-  #   icon: fa-solid fa-moon # 可自定义
+  #   icon: fa-solid fa-moon # 可自定
   #   toggle: darkmode
   darkmode:
-    enable: #true
+    enable: true
 
   # 旧版 Internet Explorer 淘汰行动
   # https://www.microsoft.com/zh-cn/WindowsForBusiness/End-of-IE-support
@@ -917,11 +915,11 @@ plugins:
     zindex: 2147483647                   # 层级
     copyright:                           # 是否在复制时弹出版权提示，影响范围：ctrl+c、代码块复制按钮、右键复制选项
       enable: true
-      title: '知识共享许可协议'
-      message: '请遵守 CC BY-NC-SA 4.0 协议。'
+      title: 'Creative Commons License'
+      message: 'Please follow the CC BY-NC-SA 4.0 License.'
       icon: 'far fa-copyright light-blue'
     aplayer:                              # 是否开启音乐通知；播放、暂停、失败 时的图标
-      enable: true
+      enable: false
       play: fa-solid fa-play
       pause: fa-solid fa-pause
     rightmenu:
@@ -1096,7 +1094,7 @@ rightmenu:
 search:
   enable: true
   service: hexo  # hexo
-  js:
+  js: #https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@2.6.4/js/search.js
 ############################### Search ############################### > end
 
 ############################### Color Scheme ############################### > start
@@ -1107,9 +1105,9 @@ color_scheme:
   # 通用颜色
   common:
     # 主题色
-    theme: '#3dd9b6'
+    theme: '#44D7B6'
     # 链接色
-    link: '#2092ec'
+    link: '#2196f3'
     # 按钮色
     button: '#44D7B6'
     # 鼠标放到交互元素上时的色
@@ -1165,38 +1163,38 @@ color_scheme:
     # 网站最深底色            # Dark Grey 1
     site_bd: '#121212'
     # 网站背景色              # Dark Grey 2
-    site_bg: '#1f1f1f'
+    site_bg: '#222'
     # 卡片背景色              # Dark Grey 3
-    card: '#262626'
+    card: '#333'
     # 网站背景上的文字
-    site_inner: '#eeeeeede'
+    site_inner: '#eee'
     # 网站页脚文字
-    site_footer: '#aaaaaade'
+    site_footer: '#aaa'
     # 卡片上的普通文字
-    text: '#eeeeeede'
+    text: '#eee'
 
     # 区块和代码块背景色       # Dark Grey 4
-    block: '#434343'
+    block: '#3a3a3a'
     # 代码块高亮时的背景色     # Dark Grey 2
-    codeblock: '#1f1f1f'
+    codeblock: '#343a3c'
     # 行内代码颜色
     inlinecode: '#D56D28'
 
     # 文章部分 高强度文本的不透明度应为87％ 中等重点文字适用于60％
-    h1: '#FFFFFFde'            #  Dark Grey 8
-    h2: '#FFFFFFde'
-    h3: '#FFFFFF99'            #  Dark Grey 7
-    h4: '#FFFFFF99'
-    h5: '#FFFFFF99'
-    h6: '#FFFFFF99'
-    p: '#d9d9d9de'           #  Dark Grey 6
+    h1: '#eee'
+    h2: '#eee'
+    h3: '#ddd'
+    h4: '#ddd'
+    h5: '#ddd'
+    h6: '#ddd'
+    p: '#bbb'
 
     # 列表文字                #  Dark Grey 6
-    list: '#d9d9d9de'
+    list: '#aaa'
     # 列表 hover 时的文字
     list_hl: 'mix($color-theme, #fff, 80)'
     # 辅助性文字              #  Dark Grey 5
-    meta: '#bfbfbfde'
+    meta: '#888'
     # 版权卡片背景色
     copyright_bkg: '#21252b'
     # 夜间图片亮度
@@ -1241,7 +1239,8 @@ custom_css:
     h3: 24px # Spacing above H3 (only px unit)
     h4: 16px # Spacing above H4 (only px unit)
     p: 1em # Paragraph spacing between paragraphs
-    line_height: 1.6 # normal, 1.5, 1.75, 2 ...
+    line: .75em
+    line_height: 1.75 # normal, 1.5, 1.75, 2 ...
   border_radius:
     card: 8px
     codeblock: 4px
@@ -1267,10 +1266,9 @@ custom_css:
       weight: normal
       style: normal
     bodyfont:
-      fontfamily: 'UbuntuMono, "Varela Round", "PingFang SC", "Microsoft YaHei", Helvetica, Arial'
-      name: 'UbuntuMono'
-      url: volantis-static/media/fonts/UbuntuMono/UbuntuMono-Regular.ttf # https://cdn.jsdelivr.net/gh/volantis-x/cdn-fonts/UbuntuMono/UbuntuMono-Regular.ttf
-      weight: normal
+      fontfamily: 'Itim, UbuntuMono, "Varela Round", "PingFang SC", "Microsoft YaHei", Helvetica, Arial'
+      name: 'Itim'
+      url: https://fonts.gstatic.com/s/itim/v10/0nknC9ziJOYe8ANAkA.woff2
       style: normal
     codefont:
       fontfamily: 'Menlo, UbuntuMono, Monaco'

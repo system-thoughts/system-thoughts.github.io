@@ -3,11 +3,34 @@ title: 程序员的自我修养 -- ELF剖析
 date: 2022-07-14T19:24:32+08:00
 tags: ELF
 categories: compilation
+references:
+     -
+          title: ELF Header
+          url: http://www.sco.com/developers/gabi/latest/ch4.eheader.html
+     -
+          title: Sections
+          url: http://www.sco.com/developers/gabi/latest/ch4.sheader.html
+     -
+          title: 节合并
+          url: https://docs.oracle.com/cd/E26926_01/html/E25910/ggdlu.html
+     -
+          title: Symbol Table
+          url: http://www.sco.com/developers/gabi/latest/ch4.symtab.html
+     -
+          title: Inside ELF Symbol Tables
+          url: https://blogs.oracle.com/solaris/post/inside-elf-symbol-tables
+     -
+          title: 名字修饰
+          url: https://zh.m.wikipedia.org/zh-hans/%E5%90%8D%E5%AD%97%E4%BF%AE%E9%A5%B0
+     -
+          title: Weak symbol
+          url: https://en.wikipedia.org/wiki/Weak_symbol
 ---
 编译生成的中间目标文件、可执行文件都是按照特定的目标文件格式进行组织。各个系统的目标文件格式不太一样，如Unix a.out格式、Windows可移植可执行程序(Portable Executable, PE)、MacOS-X使用Mach-O格式。现代Linux/Unix都是用可执行可链接格式(Eexcutable Linkable Format, ELF)。PE和ELF格式都是COFF(Common File Format)格式的变种。
 Linux上不仅中间目标文件、可执行文件采用ELF格式。采用ELF格式的文件类型可分为下表中的四类：
+
 | ELF文件类型 | 说明 | 举例 |
-| ---- | ----  | ---- |
+| ---- | ---- | ---- |
 | 可重定位文件</br>(Relocatable File) | 编译产生的中间目标文件，可以被用来链接成可执行文件或者共享目标文件，静态链接库也属于这一类 | Linux的.o文件</br>Windows中的.obj文件 |
 | 可执行文件</br>(Executable File) | 静态/动态链接的可执行程序 | Linux中的可执行程序无后缀</br>Windows中的.exe |
 | 共享目标文件</br>(Shared Object File) | 链接器可以使用这类文件和其他可重定位文件和共享目标文件链接生成新的共享目标文件；与可执行文件进行动态链接，作为进程映像的一部分 | Linux的.so</br>Windows的DLL |
@@ -59,6 +82,7 @@ int main(void)
 
 ## ELF header
 ELF header结构体及相关参数定义在`/usr/include/elf.h`，由于ELF文件在32bit和64bit下都通用，因此存在32bit版本和64bit版本，两个版本的内容一致，只是某些成员大小不一样。`elf.h`使用typedef定义了一套自己的变量体系，如表所示：
+
 | 自定义类型 | 描述 | 原始类型 | 长度(字节) |
 | --- | --- | --- | --- |
 | Elf32_Half | 32bit版本的无符号短整形 | uint16_t | 2 |
@@ -155,6 +179,7 @@ String dump of section '.shstrtab':
   [    52]  .rela.eh_frame
 ```
 第一列表示段名在`section header string table`数组中的索引，第二列表示相应的段名。`section header string table`数组中的字符串以'\0'分隔，第0位也是'\0'：
+
 | offset | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | +0 | \0 | . | s | y | m | t | a | b | \0 | . |
@@ -227,6 +252,7 @@ Key to Flags:
 section header table的第一项是无效的段描述符，默认值为0。第一项的`sh_size`字段在一种情况下也是有意义的：ELF文件段数目大于等于`SHN_LORESERVE`(0xff00)时，ELF header中的`e_shnum`字段存储`SHN_UNDEF`(0)，实际的段数目保存在无效段的`sh_size`字段中。由于`e_shnum`字段是`Elf64_Half`类型，`sh_size`字段的类型为`Elf64_Xword`类型，能够保存的数据范围大的多。这种实际索引超过当前字段类型的表示范围时，ELF规范会在当前字段存放保留值(reserved value)，并不表示实际大小。如符号表项的`st_shndx`成员，ELF header中的`e_shstrndx`：当.shstrtab字符串表中的索引大于等于`SHN_LORESERVE`(0xff00)，`e_shstrndx`保存`SHN_XINDEX`(0xffff)，实际的索引保存在无效段的`sh_link`字段中。
 
 section header table entry各个字段含义如下表所示:
+
 | Name | Description |
 | --- | --- |
 | sh_name | 段名，存储在.shstrtab字符串表中的偏移 |
@@ -242,6 +268,7 @@ section header table entry各个字段含义如下表所示:
 
 ### Section type
 下表列举了`simpleElf.o`的段类型，更为详细的描述参考[2]：
+
 | Name | Value | Description |
 | --- | --- | --- |
 | SHT_NULL | 0 | 无效段 |
@@ -260,6 +287,7 @@ SHT_SYMTAB和SHT_DYNSYM同作为符号表类型，区别如下:
 
 ### Section flag
 下表列举了`simpleElf.o`的段的标志位，`readelf -S`输出的最后一行是各flag的简称。更为详细的描述参考[2]：
+
 | Name | Value | Description |
 | --- | --- | --- |
 | SHF_WRITE | 0x1 | 该段在进程地址空间中可写 |
@@ -319,6 +347,7 @@ typedef struct
 } Elf64_Sym;
 ```
 符号表项的各个字段含义如下：
+
 | Name | Description |
 | --- | --- |
 | st_name | 符号名在字符串表.strtab中的索引 |
@@ -338,6 +367,7 @@ typedef struct
 #define ELF64_ST_INFO(b,t) (((b)<<4)+((t)&0xf))
 ```
 符号类型如下表所示，完整的symbol type见[4]
+
 | Name | Value | Description |
 | --- | --- | --- |
 | STT_NOTYPE | 0 | 未知类型符号 |
@@ -348,6 +378,7 @@ typedef struct
 | STT_COMMON | 5 | 该符号标记一个未初始化的公共块 |
 
 符号绑定属性如下表所示，完整的symbol binding见[4]
+
 | Name | Value | Description |
 | --- | --- | --- |
 | STB_LOCAL | 0 | 局部符号，仅在定义符号的目标文件中可见 |
@@ -647,17 +678,3 @@ gcc的`-fno-common`编译选项允许将所有未初始化的全局变量不以c
 int global __attribute__((nocommon));
 ```
 此时这些未定义的全局变量便是强符号。GCC和Clang之前的版本默认使用`-fcommon`编译C文件，自GCC 10/Clang 11默认采用`-fno-common`[11]。
-
-
-## Reference
-[1] http://www.sco.com/developers/gabi/latest/ch4.eheader.html
-[2] http://www.sco.com/developers/gabi/latest/ch4.sheader.html
-[3] https://docs.oracle.com/cd/E26926_01/html/E25910/ggdlu.html
-[4] http://www.sco.com/developers/gabi/latest/ch4.symtab.html
-[5] https://blogs.oracle.com/solaris/post/inside-elf-symbol-tables
-[6] https://zh.m.wikipedia.org/zh-hans/%E5%90%8D%E5%AD%97%E4%BF%AE%E9%A5%B0
-[7] https://en.wikipedia.org/wiki/Weak_symbol
-[8] https://stackoverflow.com/questions/3691835/why-uninitialized-global-variable-is-weak-symbol
-[9] https://developers.redhat.com/blog/2020/06/03/the-joys-and-perils-of-aliasing-in-c-and-c-part-2#aliases_and_weak_symbols
-[10] https://gcc.gnu.org/onlinedocs/gcc-4.3.5/gcc/Function-Attributes.html
-[11] https://maskray.me/blog/2022-02-06-common-symbols

@@ -1,4 +1,6 @@
 ---
-title: About me
-date: 2020-12-29 20:33:00
+layout: docs
+seo_title: About me
+top_meta: false
+bottom_meta: false
 ---
