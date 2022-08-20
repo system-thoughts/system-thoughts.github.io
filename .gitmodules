@@ -1,3 +1,6 @@
 [submodule "themes/inside"]
 	path = themes/inside
 	url = https://github.com/ikeq/hexo-theme-inside.git
+[submodule "themes/volantis"]
+	path = themes/volantis
+	url = https://github.com/volantis-x/hexo-theme-volantis.git

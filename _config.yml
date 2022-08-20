@@ -3,12 +3,16 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: System Thoughts
+title: 'Just Hacking Fun'
 subtitle: ''
 description: ''
 keywords:
 author: Lv Ying
-language: en
+language:
+  - en
+  - zh-CN
+  - zh-HK
+  - zh-TW
 timezone: ''
 
 # URL
@@ -98,7 +102,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: inside
+theme: volantis
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
