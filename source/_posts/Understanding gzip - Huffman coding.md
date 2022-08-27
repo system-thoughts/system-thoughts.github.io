@@ -5,6 +5,9 @@ tags: [gzip, deflate]
 categories: "Base Service"
 ---
 DEFLATE算法首先通过[LZ77算法](https://system-thoughts.github.io/base-service/Understanding%20gzip%20-%20LZ77)对数据流压缩，压缩数据流中仅包含`literal`、`length`、`distance`三种类型的数据。
+
+<!-- more -->
+
 数据是通过字符表(alphabet)中的编码表示，如ASCII编码的纯文本文件中的数据都来源于ASCII字符表。字母表中的字符在计算机中以二进制形式存储，如ASCII表中的字符`A`的二进制编码是长度为1字节的`1000001B`。DEFLATE算法定义了两张字符表编码上述三种类型的数据：`literal`和`length`使用一张字符表，`distance`单独一张字符表。
 
 ## alphabet
@@ -243,6 +246,7 @@ DEFLATE算法将`literal/length`字符表、`distance`字符表的`code length`�
 * repeat times: code length重复次数
 
 DEFLATE算法设计了REL编码的字符表：
+
 | code | extra bits | meaning |
 | --- | --- | --- |
 | 0-15 | 0 | code lengths of 0-15 |

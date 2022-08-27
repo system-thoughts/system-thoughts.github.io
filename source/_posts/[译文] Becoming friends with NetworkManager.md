@@ -3,6 +3,7 @@ title: 【译文】 Becoming friends with NetworkManager
 date: 2020-12-30T21:06:21+08:00
 tags: [RedHat, NetworkManager, Network]
 categories: [translation, tools]
+headimg: /images/headimg/networkmanager.png
 ---
 
 网上很多CentOS7网络配置的教程往往都会建议关闭Networkmanager使用network.service的方式进行网络配置：1. 配置`/etc/sysconfig/network-scripts/ifcfg-<net device>.cfg`；2. `systemctl restart network`重启网络生效。 3. 建议关闭NetworkManger，防止和network.service冲突。
@@ -118,6 +119,7 @@ connection.read-only:              no
 [...]
 ```
 连接属性的列表很长，并且按设置分组。 实际上，每个属性都被指定为`setting_name.property_name`。我们重点介绍一些属于连接和IPv4设置的基本属性：
+
 | 属性 | 描述 | 别名 |
 | --- | --- | --- |
 | connection.id | 连接名称(nmcli connection中输出) | con-name |
@@ -180,6 +182,7 @@ Connection 'ethernet-enp0s1' (64b499cb-429f-4e75-a54d-b3fd980c39aa) successfully
 
 ### nmcli备忘单
 总结下前面提及的`nmcli connection`子命令：
+
 | 命令 | 参数 | 描述 |
 | --- | --- | --- |
 | `down` | connection | 断开指定的连接，取消配置关联的设备 |

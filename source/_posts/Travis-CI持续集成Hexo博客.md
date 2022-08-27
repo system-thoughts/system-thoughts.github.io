@@ -6,6 +6,8 @@ categories: blog
 ---
 > Hexo is a fast, simple & powerful blog framework, powered by Node.js.
 
+<!-- more -->
+
 hexo不仅可以作为博客框架生成博客，更能够广泛地快捷生成任意静态页面。
 
 # hexo quick start
@@ -39,6 +41,7 @@ $ hexo new [layout] <title>
 post模板是默认的布局，通过修改_config.yml中的default_layout项修改文章的默认布局。如果不想使用任何布局，可以在文章的[Front-matter](https://hexo.io/docs/front-matter#Layout)中disable layout。
 
 使用不同模板创建的文章保存在source目录下不同的路径：
+
 | layout | path |
 |  ----  | ----  |
 | post | source/_posts |
@@ -75,6 +78,7 @@ drwxr-xr-x.   3 root root   20 Nov 19 20:34 source
 drwxr-xr-x.   3 root root   23 Nov 19 20:34 themes
 ```
 各目录解释如下：
+
 | 目录/文件 | 用途 |
 |  ----  | ----  |
 | node_modules(D) |	npm安装的各种依赖包 |
@@ -111,6 +115,7 @@ deploy:
   message: [message]
 ```
 `deploy`的各项解释如下：
+
 | 选项 | 描述 | 默认值 |
 |  ----  | ----  | ---- |
 | repo | 代码仓地址	| |
@@ -165,6 +170,7 @@ FATAL { err:
 
 ## 源文件git管理
 `hexo generate`和`hexo deploy`会新增文件和目录，这些目录的解释如下：
+
 | 目录/文件 | 用途 |
 |  ----  | ----  |
 | public(D)	| 由hexo generate生成的静态页面，hexo clean清除。Hexo 引入了差分机制，如果 public 目录存在，那么 hexo g 只会重新生成改动的文件。若要强制重新生成，使用hexo g -f |

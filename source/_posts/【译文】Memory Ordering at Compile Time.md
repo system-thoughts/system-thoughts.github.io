@@ -7,6 +7,8 @@ categories: [translation, lock-free]
 
 我们编写的C/C++代码在处理器上实际的执行顺序和其在源码中的顺序可能并不相同。编译器会通过指令重排优化编译效果，CPU也会通过乱序执行优化执行效率。本文将介绍编译时的内存重排。
 
+<!-- more -->
+
 ------
 
 > 原文链接：https://preshing.com/20120625/memory-ordering-at-compile-time/

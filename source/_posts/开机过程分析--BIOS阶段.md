@@ -8,6 +8,8 @@ categories: boot
 无论是Linux还是其他操作系统，开机启动最开始的流程由BIOS完成。当电脑上电后，BIOS首先会初始化BIOS内部状态、外部接口、检测并setup硬件。这个最开始的阶段称为开机自检(POST, Power On Self Test)。随后BIOS进入启动阶段，会检查启动介质，找到bootloader，将其加载至内存并跳转至bootloader执行。
 本文以[SeaBIOS](https://github.com/coreboot/seabios)为例，介绍x86架构下BIOS在启动流程所做的工作。SeaBIOS是16bit x86 BIOS的开源实现，也是qemu和kvm默认的BIOS。
 
+<!-- more -->
+
 ## 实模式
 x86实模式出现于Intel 8088时期，8088 CPU公有20位地址总线，8个16进制通用寄存器以及4个段寄存器(CS DS SS ES)以及3个专用寄存器(IP SP FLAGS)。要通过16位寄存器寻址20位地址空间，8088引入了分段的方法：
 > 物理地址 = 段寄存器 << 4 + 段内偏移

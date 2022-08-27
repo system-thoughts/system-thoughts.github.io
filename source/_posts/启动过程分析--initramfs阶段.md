@@ -3,12 +3,16 @@ title: 启动过程分析--initramfs阶段
 date: 2022-06-23T12:16:09+08:00
 tags: [boot, initramfs]
 categories: boot
+thumbnail: /images/thumbnail/boot_linux.png
+headimg: /images/headimg/linux_boot.png
 ---
 
 {% note guide clear::kernel version: 5.18(4b0986a3613c) %}
 {% note info::本文中的大部分代码段都有代码删除 %}
 
 系统启动过程的最后一个阶段：挂载根文件系统、执行根文件系统中的init程序完成到用户空间的切换。然而根文件系统可能是在不同的硬件设备上，如SCSI硬盘、SATA硬盘、Flash设备等，后续会出现更多的硬件设备；根文件系统可以是xfs、ext4、NFS等不同的文件系统；为了成功挂载根文件系统，内核需要具备相应的设备驱动、文件系统驱动，如果为了兼容所有的根文件系统，将所有相关驱动编译进内核，会增大内核大小，并在实际环境中引入一些无用的驱动。
+
+<!-- more -->
 
 initramfs作为一个过渡文件系统解决了挂载根文件系统的兼容性。其中包含了必要的硬件设备、文件系统驱动以及驱动的加载工具及其运行环境。initramfs可以编译进内核也可以作为单独文件由bootloader加载入内存，在内核初始化的最后阶段，会解压initramfs，运行其中的init程序完成根文件系统挂载，并执行根文件系统中的init程序，完成内核空间到用户空间的切换。
 

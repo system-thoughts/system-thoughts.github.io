@@ -7,6 +7,8 @@ categories: "Base Service"
 
 gzip是一种压缩格式也是类Unix上的文件压缩/解压缩软件，通常指GNU计划的实现，此处gzip代表GNU zip。gzip文件格式在[RFC 1952  GZIP file format specification version 4.3](https://datatracker.ietf.org/doc/html/rfc1952)中标准化，gzip基于DEFLATE算法实现数据压缩，DEFLATE算法在[RFC 1951 DEFLATE Compressed Data Format Specification version 1.3](https://datatracker.ietf.org/doc/html/rfc1951)中标准化。
 
+<!-- more -->
+
 DEFLATE算法基于LZ77算法和Huffman编码实现流数据压缩。LZ77算法是Abraham Lempel和Jacob Ziv于1977年发布的无损数据压缩算法。LZ77算法是[字典压缩算法](https://en.wikipedia.org/wiki/Dictionary_coder)的一种。字典是encoder维护的包含一组字符串的数据结构，字典压缩过程中，encoder将待压缩的文本在字典中搜索匹配字符串，若找到匹配，则将当前待压缩的字符串用字典中匹配字符串的位置索引来替代，达到缩减数据的效果。LZ77算法的字典是encoder之前已经编码的字节序列。
 
 ## LZ77算法基本原理

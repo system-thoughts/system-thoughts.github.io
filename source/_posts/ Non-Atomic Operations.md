@@ -7,6 +7,8 @@ categories: [translation, lock-free]
 
 在阅读内核源码`spin_lock`的实现时，发现有大量关于lock-free编程的知识，如`smp_cond_load_relaxed`、`atomic_try_cmpxchg_acquire`的实现。延展阅读，发现了这些涉及到memory order、atomic、cache consistency等知识点。经过google，我发现[Preshing on Programming](https://preshing.com/)这个博客对lock-free的方方面面介绍的较为详细，并且作者将这些知识点在[Mintomic](http://mintomic.github.io/)(C/C++ lock-free programming API)项目中付诸实践。
 
+<!-- more -->
+
 ---
 
 > 原文链接： https://preshing.com/20130618/atomic-vs-non-atomic-operations/

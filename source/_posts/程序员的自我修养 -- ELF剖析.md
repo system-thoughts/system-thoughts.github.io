@@ -26,7 +26,11 @@ references:
           title: Weak symbol
           url: https://en.wikipedia.org/wiki/Weak_symbol
 ---
+
 编译生成的中间目标文件、可执行文件都是按照特定的目标文件格式进行组织。各个系统的目标文件格式不太一样，如Unix a.out格式、Windows可移植可执行程序(Portable Executable, PE)、MacOS-X使用Mach-O格式。现代Linux/Unix都是用可执行可链接格式(Eexcutable Linkable Format, ELF)。PE和ELF格式都是COFF(Common File Format)格式的变种。
+
+<!-- more -->
+
 Linux上不仅中间目标文件、可执行文件采用ELF格式。采用ELF格式的文件类型可分为下表中的四类：
 
 | ELF文件类型 | 说明 | 举例 |

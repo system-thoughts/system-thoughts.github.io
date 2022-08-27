@@ -168,7 +168,7 @@ article:
   preview:
     scheme: landscape # landscape
     # pin icon for post
-    pin_icon: volantis-static/media/twemoji/assets/svg/1f4cc.svg # https://cdn.jsdelivr.net/gh/twitter/twemoji@13.0/assets/svg/1f4cc.svg
+    pin_icon: https://cdn.jsdelivr.net/gh/twitter/twemoji@13.0/assets/svg/1f4cc.svg
     # auto generate title if not exist
     auto_title: true # false, true
     # auto generate excerpt if not exist
@@ -176,16 +176,16 @@ article:
     # hide excerpt
     hide_excerpt: false
     # show split line or not
-    line_style: dashed # hidden, solid, dashed, dotted
+    line_style: hidden # hidden, solid, dashed, dotted
     # show author
-    author: false # true, false
+    author: true # true, false
     # show readmore button
     readmore: auto # auto, always
   # 文章详情页面的文章卡片本体布局方案
   body:
     # 文章顶部信息
     # 从 meta_library 中取
-    top_meta: [author, category, date, counter] #启用评论数量需在此添加
+    top_meta: [author, category, date, wordcount, counter] #启用评论数量需在此添加
     # 文章底部信息
     # 从 meta_library 中取
     bottom_meta: [updated, tags, share]
@@ -584,7 +584,7 @@ sidebar:
           text: '已运行时间：'
           unit: '天'
         wordcount:
-          enable: false
+          enable: true
           text: '本站总字数：'   # 需要启用 wordcount
           unit: '字'
         visitcounter:
@@ -745,7 +745,7 @@ plugins:
   ######## Plugins for SEO:
   # npm i hexo-wordcount
   wordcount:
-    enable: #true
+    enable: true
 
   ######## Plugins for ...
   # Button Ripple Effect
@@ -1105,7 +1105,7 @@ color_scheme:
   # 通用颜色
   common:
     # 主题色
-    theme: '#44D7B6'
+    theme: '#3c83b4'
     # 链接色
     link: '#2196f3'
     # 按钮色
@@ -1120,9 +1120,9 @@ color_scheme:
   # 亮色主题（默认）
   light:
     # 网站背景色
-    site_bg: '#f4f4f4'
+    site_bg: '#ffffff'
     # 网站背景上的文字
-    site_inner: '#fff'
+    site_inner: '#f4f4f4'
     # 网站页脚文字
     site_footer: '#666'
 
