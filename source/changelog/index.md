@@ -8,6 +8,12 @@ bottom_meta: false
 
 {% timeline Changelog %}
 
+{% timenode 2022-11-11 🔗 %}
+
+申请了域名justhack.fun，更加个性了
+
+{% endtimenode %}
+
 {% timenode 2022-08-20 💬 %}
 
 看中了基于giscus的评论系统，在inside主题中折腾了很久无果。
@@ -21,5 +27,6 @@ bottom_meta: false
 {% post_link Travis-CI持续集成Hexo博客 'Travis-CI持续集成Hexo博客' %}
 
 {% endtimenode %}
+
 
 {% endtimeline %}
